@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دليل التعلم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg2:#1b4a4a;--pr:#1b6b5a;--ac:#0a8545;--tl:#2dd4bf;--tm:#1f2937;--mu:#6b7280;--nv:#1b5e5e;--bd:#d1fae5;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;width:100%;font-family:'Cairo',sans-serif;background:#f0f4f4;color:var(--tm);overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;}
+body{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:100;}
+.header{background:var(--bg2);padding:5px 16px;text-align:center;position:relative;border-bottom:2px solid #14b8a6;flex-shrink:0;}
+.ht{font-size:13px;font-weight:700;color:#fff;line-height:1.4;}
+.sbdg{position:absolute;top:50%;left:14px;transform:translateY(-50%);background:var(--ac);color:#fff;padding:1px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.nav{display:flex;justify-content:center;gap:5px;background:var(--nv);padding:5px 10px;flex-wrap:wrap;border-bottom:2px solid #0f766e;flex-shrink:0;}
+.nav a{color:#e0f2f1;text-decoration:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:50px;border:1.5px solid rgba(167,243,208,0.4);transition:all .25s;}
+.nav a:hover{background:#fff;color:#1b5e5e;}
+.page{flex:1;display:flex;flex-wrap:wrap;min-height:0;}
+.sidebar{width:210px;min-width:180px;background:var(--bg2);flex-shrink:0;display:flex;flex-direction:column;border-left:2px solid #14b8a6;position:sticky;top:var(--topbar-h,90px);align-self:flex-start;max-height:calc(100vh - var(--topbar-h,90px));}
+.sbh{padding:9px 12px 7px;background:linear-gradient(135deg,#0f3030,#1b5e5e);border-bottom:1px solid rgba(45,212,191,.3);flex-shrink:0;}
+.sbh h3{color:var(--tl);font-size:12px;font-weight:900;}
+.sbh p{color:rgba(255,255,255,.5);font-size:9px;font-weight:600;margin-top:2px;}
+.slist{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:3px;}
+.slist::-webkit-scrollbar{width:3px;}.slist::-webkit-scrollbar-thumb{background:rgba(45,212,191,.3);border-radius:10px;}
+.sbtn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:6px 8px;cursor:pointer;font-family:'Cairo',sans-serif;width:100%;text-align:right;transition:all .2s;}
+.sbtn:hover{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.3);}
+.sbtn.active{background:rgba(45,212,191,.14);border-color:var(--tl);}
+.sn{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#94a3b8;line-height:1;}
+.sbtn.active .sn{background:linear-gradient(135deg,var(--pr),var(--ac));border-color:var(--tl);color:#fff;}
+.sbtn.done .sn{background:var(--ac);border-color:var(--tl);color:#fff;font-size:10px;}
+.st{flex:1;min-width:0;}
+.stt{font-size:10.5px;font-weight:700;color:#d4f5f0;line-height:1.3;}
+.sts{font-size:9px;font-weight:600;color:rgba(255,255,255,.38);margin-top:1px;}
+.sbtn.active .stt{color:var(--tl);}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;}
+.sbtn.active .dot{background:var(--tl);box-shadow:0 0 5px var(--tl);}
+.sbtn.done .dot{background:var(--ac);}
+.pw{padding:7px 10px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.pr2{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:4px;}
+.pb{height:4px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
+.pf{height:100%;background:linear-gradient(90deg,var(--pr),var(--tl));transition:width .4s;border-radius:10px;}
+.content{flex:1;min-width:280px;display:flex;flex-direction:column;min-height:0;}
+.panel{display:none;flex:1;flex-direction:column;min-height:0;}
+.panel.active{display:flex;}
+.pbar{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--bg2),#0f766e);padding:7px 14px;flex-shrink:0;}
+.pic{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.pbar h2{font-size:12px;font-weight:900;color:#fff;}
+.pbar p{font-size:9px;color:rgba(255,255,255,.65);font-weight:600;margin-top:1px;}
+.pbdg{margin-right:auto;flex-shrink:0;background:rgba(45,212,191,.18);border:1px solid var(--tl);color:var(--tl);padding:2px 9px;border-radius:20px;font-size:9px;font-weight:700;}
+.pbody{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px 4px;display:flex;flex-direction:column;gap:7px;min-height:0;}
+.pbody::-webkit-scrollbar{width:3px;}.pbody::-webkit-scrollbar-thumb{background:#d1fae5;border-radius:10px;}
+.pnav{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;border-top:1px solid #e5e7eb;flex-shrink:0;background:#fff;}
+.nb{display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:50px;border:none;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;}
+.np{background:#f3f4f6;color:#374151;}.np:hover{background:#e5e7eb;}
+.nn{background:linear-gradient(135deg,var(--pr),var(--ac));color:#fff;box-shadow:0 3px 10px rgba(10,133,69,.3);}
+.nn:hover{transform:translateX(-2px);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.g1{display:grid;grid-template-columns:1fr;gap:7px;}
+.g2>*,.g3>*,.g1>*{min-width:0;}
+.card{background:#fff;border-radius:11px;border:1.5px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;}
+.ch{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f8fffe;border-bottom:1px solid #f1f5f9;}
+.chi{font-size:12px;line-height:1;flex-shrink:0;}
+.cht{font-size:11px;font-weight:800;color:var(--pr);}
+.cb{padding:7px 10px;}
+.li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px dashed #f3f4f6;}
+.li:last-child{border:none;padding-bottom:0;}
+.ln{width:18px;height:18px;border-radius:5px;flex-shrink:0;background:linear-gradient(135deg,var(--pr),var(--ac));color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.lic{font-size:12px;flex-shrink:0;margin-top:1px;line-height:1;}
+.lt{font-size:11px;font-weight:600;color:var(--tm);line-height:1.55;}
+.lt strong{color:var(--pr);font-weight:800;}
+.flow{display:flex;flex-direction:column;}
+.fs{display:flex;gap:8px;padding:5px 0;border-right:2px solid var(--bd);margin-right:8px;padding-right:10px;position:relative;}
+.fs::before{content:'';position:absolute;right:-4px;top:11px;width:7px;height:7px;border-radius:50%;background:var(--pr);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--pr);}
+.fs:last-child{border-right-color:transparent;}
+.fn{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--pr),var(--ac));color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.ft{font-size:10.5px;font-weight:800;color:var(--pr);margin-bottom:1px;}
+.fd{font-size:9.5px;font-weight:600;color:var(--mu);line-height:1.4;}
+.hbox{background:linear-gradient(135deg,#ecfdf5,#f0fdf9);border:1.5px solid #a7f3d0;border-radius:9px;padding:8px 11px;}
+.hbt{font-size:11px;font-weight:800;color:var(--pr);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+.hbox p{font-size:10.5px;font-weight:600;color:var(--tm);line-height:1.65;}
+.wbox{background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:7px 11px;display:flex;align-items:flex-start;gap:7px;}
+.wi{font-size:14px;flex-shrink:0;margin-top:1px;line-height:1;}
+.wbox p{font-size:10.5px;font-weight:600;color:#92400e;line-height:1.55;}
+.gtbl{width:100%;border-collapse:collapse;font-size:10.5px;}
+.tbl-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  .g2,.g3{grid-template-columns:1fr;}
+  .sidebar{width:100%;}
+  .page{flex-direction:column;}
+}
+.gtbl th{background:var(--bg2);color:var(--tl);padding:5px 9px;text-align:right;font-size:10px;font-weight:800;}
+.gtbl td{padding:5px 9px;border-bottom:1px solid #f1f5f9;font-weight:600;}
+.gtbl tr:last-child td{border:none;}.gtbl tr:nth-child(even) td{background:#f8fffe;}
+.badge{display:inline-block;padding:1px 7px;border-radius:12px;font-size:9px;font-weight:700;}
+.bg{background:#d1fae5;color:#065f46;}.bb{background:#dbeafe;color:#1e40af;}.ba{background:#fef3c7;color:#92400e;}
+.cta{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--pr),var(--ac));color:#fff;text-decoration:none;padding:9px 22px;border-radius:50px;font-size:12px;font-weight:900;font-family:'Cairo',sans-serif;box-shadow:0 4px 14px rgba(10,133,69,.35);transition:all .25s;}
+.cta:hover{transform:translateY(-2px);}
+.panel-img{width:100%;height:auto;max-height:75%;object-fit:contain;object-position:top;display:block;border-radius:8px;}
+.pbody{overflow-y:auto !important;overflow-x:hidden !important;align-items:flex-start;}
+
+.nav a.active{background:#fff;color:#1b5e5e;border-color:#fff;}
+
+/* ===== شعارات الهيدر: الجامعة يمين / الكلية يسار ===== */
+.header,.hdr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:48px;position:relative;}
+.brand-logos{position:absolute;top:0;bottom:0;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;direction:rtl;}
+.brand-logo{height:36px;width:auto;background:#fff;border-radius:9px;padding:2px 4px;box-shadow:0 2px 8px rgba(0,0,0,.25);object-fit:contain;}
+.brand-uni{border-radius:50%;padding:2px;}
+.header .support-badge,.header .sbdg,.hdr .sup-b{position:static!important;transform:none!important;display:inline-block;margin-top:3px;}
+@media (min-width:769px){
+  .header-title,.hdr-t,.ht{max-width:min(70%,calc(100% - 270px))!important;}
+}
+@media (max-width:768px){
+  .brand-logos{position:static;width:100%;padding:0 4px;margin-bottom:4px;}
+  .brand-logo{height:30px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ صندوق تكبير صورة الدليل ══ -->
+<div id="guideZoomOverlay" onclick="closeGuideZoom()"
+  style="display:none;position:fixed;inset:0;background:rgba(15,23,25,.92);z-index:6000;
+         align-items:center;justify-content:center;padding:24px;cursor:zoom-out;">
+  <img id="guideZoomTarget" src="" alt="تكبير الصورة"
+       style="max-width:94%;max-height:94%;object-fit:contain;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);" />
+  <div style="position:absolute;top:18px;left:18px;background:rgba(255,255,255,.15);color:#fff;
+              border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+              font-size:20px;">✕</div>
+</div>
+<script>
+  function openGuideZoom(src){
+    document.getElementById('guideZoomTarget').src = src;
+    document.getElementById('guideZoomOverlay').style.display = 'flex';
+  }
+  function closeGuideZoom(){
+    document.getElementById('guideZoomOverlay').style.display = 'none';
+  }
+</script>
+
+<div class="topbar">
+<div class="header">
+<div class="brand-logos"><img class="brand-logo brand-uni" src="data:image/png;base64,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" alt="شعار جامعة الزقازيق"><img class="brand-logo brand-col" src="data:image/jpeg;base64,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" alt="شعار كلية التربية النوعية"></div>
+    <div class="sbdg">✨ نمط الدعم الثابت</div>
+    <div class="ht">بيئة التعلم المدمج لتنمية مهارات إنتاج الدروس التفاعلية لدى طلاب كلية التربية النوعية</div>
+</div>
+<div class="nav">
+  <a href="index.html">🏠 الرئيسية</a>
+  <a href="aims.html">🎯 أهداف البيئة</a>
+  <a href="guied.html" class="active">📚 دليل التعلم</a>
+  <a href="mods.html">📖 المحتوى التعليمي</a>
+  <a href="pretest.html">📝 التقويم</a>
+  <a href="trian.html">🧩 اختبار أساليب التعلم</a>
+  <a href="contact.html">📞 اتصل بنا</a>
+</div>
+</div>
+<div class="page">
+<div class="sidebar">
+    <div class="sbh"><h3>📚 دليل المتعلم</h3><p>اتبع الخطوات بالترتيب</p></div>
+    <div class="slist" id="slist"></div>
+    <div class="pw">
+        <div class="pr2"><span>التقدم</span><span id="pp">0%</span></div>
+        <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+    </div>
+</div>
+<div class="content">
+
+<!-- PANEL 1 -->
+<div class="panel active" id="p1">
+<div class="pbar"><div class="pic">🌟</div><div><h2>مرحباً بك في بيئة التعلم المدمج</h2><p>تعرّف على البيئة قبل البدء</p></div><div class="pbdg">١ من ٨</div></div>
+<div class="pbody">
+    <div class="hbox">
+      <div class="hbt">👋 أهلاً بك في بيئة التعلم المدمج</div>
+      <p>هذه البيئة جزء من دراسة بحثية (رسالة دكتوراه) حول أثر التفاعل بين <strong>أنماط الدعم</strong> و<strong>أساليب التعلم</strong> على تنمية مهارات إنتاج الدروس التفاعلية باستخدام برنامج CourseLab.</p>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><span class="chi">🗺️</span><span class="cht">رحلتك داخل البيئة</span></div>
+        <div class="cb">
+          <div class="flow">
+            <div class="fs"><div class="fn">1</div><div><div class="ft">استكشف البيئة</div><div class="fd">تعرّف على الأهداف ودليل التعلم قبل البدء.</div></div></div>
+            <div class="fs"><div class="fn">2</div><div><div class="ft">أدِّ الاختبار القبلي</div><div class="fd">لقياس مستواك قبل دراسة المحتوى.</div></div></div>
+            <div class="fs"><div class="fn">3</div><div><div class="ft">ادرس الموديولات</div><div class="fd">الموديول الثالث ثم الرابع، درسًا درسًا.</div></div></div>
+            <div class="fs"><div class="fn">4</div><div><div class="ft">نفّذ الأنشطة</div><div class="fd">في نهاية كل درس، وسلّم إجابتك.</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">🎯</span><span class="cht">ماذا يميّز هذه البيئة؟</span></div>
+        <div class="cb">
+          <div class="li"><div class="ln">١</div><div class="lt"><strong>دعم مستمر:</strong> نصائح وتوجيهات تظهر تباعًا طوال دراستك.</div></div>
+          <div class="li"><div class="ln">٢</div><div class="lt"><strong>محتوى متنوع:</strong> نص، فيديو، وإنفوجرافيك بالتناوب بين الدروس.</div></div>
+          <div class="li"><div class="ln">٣</div><div class="lt"><strong>تصميم بلا تمرير:</strong> كل ما تحتاجه يظهر أمامك مباشرة.</div></div>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="pnav"><div></div><button class="nb nn" onclick="go(2)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 2 -->
+<div class="panel" id="p2">
+<div class="pbar"><div class="pic">💻</div><div><h2>متطلبات التعلم والأدوات اللازمة</h2><p>تأكد من جاهزية بيئتك التقنية</p></div><div class="pbdg">٢ من ٨</div></div>
+<div class="pbody">
+    <div class="g3">
+      <div class="card">
+        <div class="ch"><span class="chi">🖥️</span><span class="cht">الجهاز</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">كمبيوتر أو لابتوب أو تابلت بشاشة لا تقل عن 10 بوصة لعرض المحتوى بوضوح.</p></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">📶</span><span class="cht">الإنترنت</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">اتصال مستقر لمشاهدة الفيديوهات وتحميل الأنشطة دون انقطاع.</p></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">🌐</span><span class="cht">المتصفح</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">إصدار حديث من Chrome أو Firefox أو Edge لأفضل أداء.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="chi">🎧</span><span class="cht">أدوات إضافية موصى بها</span></div>
+      <div class="cb">
+        <div class="li"><div class="ln">١</div><div class="lt">سماعات لمتابعة شرح الفيديوهات التعليمية بوضوح.</div></div>
+        <div class="li"><div class="ln">٢</div><div class="lt">دفتر ملاحظات لتدوين النقاط المهمة أثناء الدراسة.</div></div>
+      </div>
+    </div>
+    <div class="wbox">
+      <span class="wi">⚠️</span>
+      <p><strong>مهم:</strong> إذا لاحظت ظهور شريط تمرير أو أن أي عنصر مقصوص، صغّر تكبير المتصفح (Ctrl و−) حتى تظهر الصفحة كاملة بدون تمرير.</p>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(1)">→ السابق</button><button class="nb nn" onclick="go(3)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 3 -->
+<div class="panel" id="p3">
+<div class="pbar"><div class="pic">🗺️</div><div><h2>كيفية التنقل داخل البيئة</h2><p>أدوات التنقل والوصول للمحتوى</p></div><div class="pbdg">٣ من ٨</div></div>
+<div class="pbody">
+    <div class="card">
+      <div class="ch"><span class="chi">🧭</span><span class="cht">شريط التنقل العلوي</span></div>
+      <div class="cb">
+        <div class="li"><div class="lic">🏠</div><div class="lt"><strong>الرئيسية:</strong> صفحة البداية ومعلومات البحث.</div></div>
+        <div class="li"><div class="lic">🎯</div><div class="lt"><strong>أهداف البيئة:</strong> ما ستتعلمه بنهاية دراستك.</div></div>
+        <div class="li"><div class="lic">📚</div><div class="lt"><strong>دليل التعلم:</strong> هذا الدليل الذي تقرؤه الآن.</div></div>
+        <div class="li"><div class="lic">📖</div><div class="lt"><strong>المحتوى التعليمي:</strong> الموديولات والدروس.</div></div>
+        <div class="li"><div class="lic">📢</div><div class="lt"><strong>لوحة الإعلانات:</strong> آخر التحديثات والمواعيد المهمة.</div></div>
+        <div class="li"><div class="lic">📞</div><div class="lt"><strong>اتصل بنا:</strong> التواصل مع المشرف الأكاديمي.</div></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><span class="chi">📂</span><span class="cht">داخل كل موديول</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">اضغط على أي درس في القائمة الجانبية لتفتح أقسامه الثلاثة: <strong>أهداف الدرس</strong>، <strong>محتوى الدرس</strong>، <strong>النشاط التعليمي</strong>.</p></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">🤝</span><span class="cht">لوحة الدعم</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">تظهر بجانب كل درس وتضيف نصائح جديدة باستمرار — مرّر لأعلى لمراجعة كل ما سبق.</p></div>
+      </div>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(2)">→ السابق</button><button class="nb nn" onclick="go(4)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 4 -->
+<div class="panel" id="p4">
+<div class="pbar"><div class="pic">📋</div><div><h2>خطوات الدراسة المنهجية</h2><p>اتبع هذه الخطوات بدقة داخل كل درس</p></div><div class="pbdg">٤ من ٨</div></div>
+<div class="pbody">
+    <div class="card">
+      <div class="ch"><span class="chi">📋</span><span class="cht">خطوات دراسة أي درس</span></div>
+      <div class="cb">
+        <div class="flow">
+          <div class="fs"><div class="fn">1</div><div><div class="ft">اقرأ أهداف الدرس</div><div class="fd">لتعرف ما المطلوب منك تحديدًا قبل البدء.</div></div></div>
+          <div class="fs"><div class="fn">2</div><div><div class="ft">ادرس المحتوى</div><div class="fd">نص وفيديو، أو إنفوجرافيك وفيديو — حسب الدرس.</div></div></div>
+          <div class="fs"><div class="fn">3</div><div><div class="ft">تابع نقاط الدعم</div><div class="fd">توجيهات تظهر تباعًا يسار الشاشة أثناء دراستك.</div></div></div>
+          <div class="fs"><div class="fn">4</div><div><div class="ft">نفّذ النشاط التعليمي</div><div class="fd">اكتب إجابتك في المساحة المخصصة بدقة.</div></div></div>
+          <div class="fs"><div class="fn">5</div><div><div class="ft">سلّم إجابتك</div><div class="fd">اضغط زر «تسليم الإجابة» ثم انتقل للدرس التالي.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="hbox">
+      <div class="hbt">✅ نصيحة</div>
+      <p>لا تنتقل للدرس التالي قبل التأكد من فهم أهداف الدرس الحالي وتنفيذ نشاطه كاملًا.</p>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(3)">→ السابق</button><button class="nb nn" onclick="go(5)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 5 -->
+<div class="panel" id="p5">
+<div class="pbar"><div class="pic">📖</div><div><h2>دليل الموديولات والمحتوى التعليمي</h2><p>نظرة تفصيلية على الموديولات</p></div><div class="pbdg">٥ من ٨</div></div>
+<div class="pbody">
+    <div class="tbl-wrap"><table class="gtbl">
+      <tr><th>الموديول</th><th>عدد الدروس</th><th>يغطّي</th></tr>
+      <tr><td><span class="badge bg">الموديول الثالث</span></td><td>7 دروس</td><td>أساسيات CourseLab: من التثبيت والتصميم الأول وحتى إدراج الأسئلة والاختبارات التفاعلية.</td></tr>
+      <tr><td><span class="badge bb">الموديول الرابع</span></td><td>3 دروس</td><td>نشر الدرس التفاعلي، التغذية الراجعة لمرحلة الإنتاج، ومرحلة التقويم الختامي.</td></tr>
+    </table></div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><span class="chi">🔒</span><span class="cht">الدخول للموديولات</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">كل موديول محمي بكلمة مرور يوفّرها لك المشرف — أدخلها من صفحة «المحتوى التعليمي».</p></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">➡️</span><span class="cht">بعد إنهاء الموديولات</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">بعد آخر درس بكل موديول ستجد بانرًا يوجّهك تلقائيًا للخطوة التالية.</p></div>
+      </div>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(4)">→ السابق</button><button class="nb nn" onclick="go(6)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 6 -->
+<div class="panel" id="p6">
+<div class="pbar"><div class="pic">💡</div><div><h2>إرشادات وتوجيهات الدراسة</h2><p>نصائح لتحقيق أقصى استفادة</p></div><div class="pbdg">٦ من ٨</div></div>
+<div class="pbody">
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><span class="chi">🤝</span><span class="cht">استفد من الدعم المستمر</span></div>
+        <div class="cb">
+          <div class="li"><div class="ln">١</div><div class="lt">راجع نقاط الدعم أول بأول — تُضاف تباعًا ولا تُحذف.</div></div>
+          <div class="li"><div class="ln">٢</div><div class="lt">مرّر لأعلى داخل لوحة الدعم لمراجعة أي نصيحة سابقة.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">⏱️</span><span class="cht">نظّم وقتك</span></div>
+        <div class="cb">
+          <div class="li"><div class="ln">١</div><div class="lt">خصص وقتًا كافيًا لكل درس دون استعجال.</div></div>
+          <div class="li"><div class="ln">٢</div><div class="lt">لا تؤجل تنفيذ الأنشطة لآخر الموديول.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="hbox">
+      <div class="hbt">💡 لتحقيق أقصى استفادة</div>
+      <p>شاهد الفيديو كاملًا، اقرأ المحتوى النصّي أو الإنفوجرافيك بتمعّن، ثم نفّذ النشاط بنفسك قبل الانتقال للدرس التالي — الفهم التراكمي أهم من السرعة.</p>
+    </div>
+    <div class="wbox">
+      <span class="wi">⚠️</span>
+      <p>لا تتخطَّ أي نشاط تعليمي — كل نشاط مرتبط مباشرة بتقييمك النهائي في الاختبار التحصيلي البعدي.</p>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(5)">→ السابق</button><button class="nb nn" onclick="go(7)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 7 -->
+<div class="panel" id="p7">
+<div class="pbar"><div class="pic">📝</div><div><h2>التقويم والاختبار التحصيلي</h2><p>كل ما تحتاج معرفته عن الاختبار</p></div><div class="pbdg">٧ من ٨</div></div>
+<div class="pbody">
+    <div class="card">
+      <div class="ch"><span class="chi">🧪</span><span class="cht">مسار التقويم في البيئة</span></div>
+      <div class="cb">
+        <div class="flow">
+          <div class="fs"><div class="fn">1</div><div><div class="ft">الاختبار التحصيلي القبلي</div><div class="fd">قبل دراسة المحتوى، لقياس مستواك المبدئي.</div></div></div>
+          <div class="fs"><div class="fn">2</div><div><div class="ft">دراسة الموديولات والأنشطة</div><div class="fd">الموديول الثالث ثم الرابع.</div></div></div>
+          <div class="fs"><div class="fn">3</div><div><div class="ft">الاختبار التحصيلي البعدي</div><div class="fd">بعد إتمام كل الدروس، لقياس ما تعلّمته.</div></div></div>
+          <div class="fs"><div class="fn">4</div><div><div class="ft">اختبار أسلوب التعلم</div><div class="fd">يفتح تلقائيًا بعد اجتياز البعدي بنجاح.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="hbox">
+      <div class="hbt">📌 يهمّك معرفته</div>
+      <p>لن تظهر لك الإجابة الصحيحة أو درجة السؤال أثناء أداء أي اختبار — ستظهر نتيجتك وتصنيفك فقط بعد الانتهاء منه.</p>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(6)">→ السابق</button><button class="nb nn" onclick="go(8)">التالي ←</button></div>
+</div>
+
+<!-- PANEL 8 -->
+<div class="panel" id="p8">
+<div class="pbar"><div class="pic">🎉</div><div><h2>التواصل والدعم الأكاديمي</h2><p>أنت جاهز للانطلاق!</p></div><div class="pbdg">٨ من ٨</div></div>
+<div class="pbody">
+    <div class="hbox">
+      <div class="hbt">🎉 أنت جاهز تمامًا للانطلاق!</div>
+      <p>راجعت أهم ما تحتاجه للتنقل والدراسة داخل البيئة. إن واجهتك أي صعوبة في أي وقت، تواصل معنا مباشرة.</p>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><span class="chi">📞</span><span class="cht">التواصل مع المشرف</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">من صفحة «اتصل بنا» يمكنك المراسلة مباشرة عبر واتساب أو البريد الإلكتروني.</p></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="chi">🤝</span><span class="cht">الدعم أثناء الدروس</span></div>
+        <div class="cb"><p style="font-size:11px;font-weight:600;color:var(--tm);line-height:1.7;">لوحة الدعم المستمرة بجانب كل درس تقدّم لك توجيهات فورية طوال دراستك.</p></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:6px 0;">
+      <a href="contact.html" class="cta">📞 تواصل معنا الآن</a>
+    </div>
+</div>
+<div class="pnav"><button class="nb np" onclick="go(7)">→ السابق</button><div style="font-size:10px;color:var(--mu);font-weight:700">🎉 أنهيت دليل المتعلم!</div></div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /page -->
+<script>
+const STEPS=[
+    {n:1,t:'مرحباً بك في البيئة',s:'نظرة عامة',i:'🌟'},
+    {n:2,t:'متطلبات التعلم',s:'الجهاز والبرامج',i:'💻'},
+    {n:3,t:'التنقل داخل البيئة',s:'شريط التنقل والمسار',i:'🗺️'},
+    {n:4,t:'خطوات الدراسة',s:'الترتيب الصحيح',i:'📋'},
+    {n:5,t:'الموديولات والمحتوى',s:'الجداول والمحتوى',i:'📖'},
+    {n:6,t:'إرشادات وتوجيهات',s:'افعل وتجنب',i:'💡'},
+    {n:7,t:'التقويم والاختبار',s:'معلومات الاختبار',i:'📝'},
+    {n:8,t:'التواصل والدعم',s:'قنوات التواصل',i:'🎉'},
+];
+let cur=1;const vis=new Set([1]);
+function build(){
+    const l=document.getElementById('slist');l.innerHTML='';
+    STEPS.forEach(s=>{
+        const a=s.n===cur,d=vis.has(s.n)&&!a;
+        const b=document.createElement('button');
+        b.className='sbtn'+(a?' active':'')+(d?' done':'');
+        b.innerHTML=`<div class="sn">${d?'✓':s.i}</div><div class="st"><div class="stt">${s.t}</div><div class="sts">${s.s}</div></div><div class="dot"></div>`;
+        b.onclick=()=>go(s.n);l.appendChild(b);
+    });
+}
+function go(n){
+    document.getElementById('p'+cur).classList.remove('active');
+    cur=n;vis.add(n);
+    document.getElementById('p'+n).classList.add('active');
+    const p=Math.round(vis.size/STEPS.length*100);
+    document.getElementById('pf').style.width=p+'%';
+    document.getElementById('pp').textContent=p+'%';
+    build();
+}
+build();
+
+/* ══ حساب ارتفاع الشريط العلوي فعليًا وتمريره كمتغيّر CSS
+   حتى تلتصق اللوحة الجانبية أسفله بدقّة على أي مقاس شاشة أو مستوى تكبير ══ */
+function updateTopbarHeight() {
+    const tb = document.querySelector('.topbar');
+    if (tb) document.documentElement.style.setProperty('--topbar-h', tb.offsetHeight + 'px');
+}
+updateTopbarHeight();
+window.addEventListener('resize', updateTopbarHeight);
+window.addEventListener('load', updateTopbarHeight);
+</script>
+</body>
+</html>

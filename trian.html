@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار الأشكال المتضمنة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef4f3;--dark:#1b4a4a;--nav:#1b5e5e;
+  --pri:#1b6b5a;--teal:#14b8a6;--acc:#0a8545;
+  --card:#fff;--border:#c8ede4;--txt:#1f2937;--muted:#6b7280;
+  --red:#dc2626;--warn:#d97706;--ok:#16a34a;
+  --sh:0 4px 28px rgba(27,74,74,.13);--r:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;}
+body{display:flex;flex-direction:column;height:100vh}
+
+/* HEADER */
+.hdr{background:var(--dark);padding:5px 16px;text-align:center;position:relative;border-bottom:2px solid var(--teal);flex-shrink:0;}
+.hdr-t{font-size:14px;font-weight:700;color:#fff;max-width:72%;margin:0 auto;line-height:1.4;}
+.sup-b{position:absolute;top:50%;left:14px;transform:translateY(-50%);background:var(--acc);color:#fff;padding:2px 12px;border-radius:18px;font-size:11px;font-weight:700;}
+
+/* NAV */
+.nav{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;background:var(--nav);padding:5px 10px;border-bottom:2px solid #0f766e;flex-shrink:0;}
+.nav a{color:#e0f2f1;text-decoration:none;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:50px;border:1.5px solid rgba(167,243,208,.4);transition:all .2s;}
+.nav a:hover{background:#fff;color:#1b5e5e}
+
+/* LAYOUT — شاشة تعليمات مستقلة ثم منطقة اختبار بعرض كامل */
+.layout{flex:1;display:flex;gap:12px;padding:10px 12px;overflow:hidden;min-height:0;}
+
+/* شاشة التعليمات المستقلة (تظهر أولاً بملء الشاشة) */
+.instr-overlay{
+  position:fixed;inset:0;background:rgba(27,74,74,.7);backdrop-filter:blur(8px);
+  z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.instr-overlay .card{width:100%;max-width:640px;max-height:92vh;box-shadow:0 28px 70px rgba(27,74,74,.32);}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.card-h{background:linear-gradient(135deg,var(--pri),var(--teal));color:#fff;padding:8px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.card-b{flex:1;padding:12px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+
+/* ======= INSTRUCTIONS (compact) ======= */
+.inst-body{flex:1;overflow-y:auto;font-size:12px;line-height:1.85;color:var(--txt);}
+.inst-body::-webkit-scrollbar{width:3px}.inst-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.inst-body ul{padding-right:16px;margin:6px 0}
+.inst-body li{margin-bottom:4px}
+.box-g{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:7px;padding:7px 10px;margin:6px 0;font-size:11.5px;}
+.box-y{background:#fef3c7;border:1px solid #fcd34d;border-radius:7px;padding:7px 10px;margin:6px 0;font-size:11.5px;}
+
+.sec-head{font-size:12px;font-weight:700;color:var(--pri);border-right:3px solid var(--teal);padding-right:7px;margin:8px 0 4px;}
+.sec-num{display:inline-block;background:var(--pri);color:#fff;border-radius:12px;padding:1px 9px;font-size:10.5px;font-weight:700;margin-bottom:6px;}
+
+/* Example SVG area */
+.ex-row{display:flex;gap:12px;align-items:center;justify-content:center;margin:8px 0;flex-wrap:wrap;}
+
+.inav{display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-shrink:0;}
+.dots{display:flex;gap:4px}
+.dot{width:7px;height:7px;border-radius:50%;background:#d1d5db;transition:background .2s;}
+.dot.on{background:var(--pri)}
+
+/* Buttons */
+.btn{padding:5px 14px;border-radius:20px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;transition:all .2s;}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.bpri{background:var(--pri);color:#fff}.bpri:not(:disabled):hover{background:#145448}
+.bsec{background:#f3f4f6;color:var(--txt);border:1.5px solid #e5e7eb}.bsec:not(:disabled):hover{background:#e5e7eb}
+.bred{background:#fee2e2;color:var(--red);border:1.5px solid #fca5a5}.bred:hover{background:#fca5a5}
+.bgrn{background:var(--ok);color:#fff}.bgrn:hover{background:#15803d}
+.bstart{background:linear-gradient(135deg,var(--pri),var(--teal));color:#fff;padding:8px 24px;border-radius:25px;border:none;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(27,107,90,.24);transition:all .2s;margin-top:8px;}
+.bstart:hover{transform:translateY(-1px)}
+.bgo{background:linear-gradient(135deg,var(--pri),var(--teal));color:#fff;padding:10px 24px;border-radius:26px;border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(27,107,90,.26);transition:all .2s;}
+.bgo:hover{transform:translateY(-1px)}
+
+/* ======= TEST AREA ======= */
+.tarea{flex:1;display:flex;flex-direction:column;min-height:0;gap:5px}
+
+.srow{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.stag{background:var(--pri);color:#fff;border-radius:14px;padding:2px 11px;font-size:11px;font-weight:700;}
+.qct{font-size:11px;color:var(--muted);font-weight:600}
+
+.tdisp{text-align:center;font-size:12.5px;font-weight:700;color:var(--pri);flex-shrink:0;}
+.tdisp.rd{color:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.ttrack{background:#e5e7eb;border-radius:7px;height:6px;overflow:hidden;flex-shrink:0;}
+.tfill{height:100%;border-radius:7px;background:linear-gradient(90deg,#10b981,#06b6d4);transition:width 1s linear,background .4s;}
+.tfill.rd{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+
+/* Progress dots */
+.prow{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;flex-shrink:0;}
+.pd{width:10px;height:10px;border-radius:50%;background:#e5e7eb;border:1.5px solid #d1d5db;transition:all .25s;}
+.pd.cur{background:var(--pri);border-color:var(--pri);transform:scale(1.25)}
+.pd.yes{background:var(--ok);border-color:var(--ok)}
+.pd.no{background:var(--red);border-color:var(--red)}
+
+/* Main question display */
+.qarea{flex:1;display:flex;flex-direction:column;align-items:center;min-height:0;overflow:hidden;gap:4px;}
+.qlbl{font-size:13px;font-weight:700;color:var(--pri);text-align:center;flex-shrink:0;}
+
+/* Shapes row */
+.shrow{display:flex;gap:16px;align-items:flex-end;justify-content:center;flex-shrink:0;}
+.sbox{text-align:center}
+.sbox label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px;font-weight:600;}
+#simC{border:2px solid var(--border);border-radius:8px;background:#f8fffe;display:block;}
+#tstC{border:2px dashed #a7f3d0;border-radius:10px;background:#f8fffe;cursor:crosshair;display:block;}
+.chint{font-size:10.5px;color:var(--muted);text-align:center;flex-shrink:0;}
+
+/* Feedback */
+.fb{text-align:center;font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:8px;display:none;flex-shrink:0;}
+.fb.ok{color:var(--ok);background:#dcfce7;display:block}
+.fb.err{color:var(--red);background:#fee2e2;display:block}
+
+.arow{display:flex;gap:7px;justify-content:center;flex-shrink:0;flex-wrap:wrap;}
+
+/* Waiting */
+.wait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:10px;text-align:center;}
+
+/* Section break */
+.sbk{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;}
+.sbk.on{display:flex}
+.sbk h2{font-size:17px;font-weight:900;color:var(--pri)}
+.sbk p{font-size:12.5px;color:var(--muted);max-width:270px;line-height:1.8}
+
+/* Results */
+.res{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:7px;animation:fi .5s ease;text-align:center;overflow-y:auto;padding:8px 4px;}
+.res.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ric{font-size:42px;flex-shrink:0;}
+.rtitle{font-size:17px;font-weight:900;color:var(--pri);flex-shrink:0;}
+.rscore{font-size:13px;color:var(--muted);flex-shrink:0;}
+.rbadge{background:var(--pri);color:#fff;border-radius:26px;padding:5px 18px;font-size:13px;font-weight:700;flex-shrink:0;}
+.rbadge.ind{background:var(--ok)}.rbadge.dep{background:var(--warn)}
+.rdet{font-size:11px;color:var(--muted);line-height:1.7;max-width:300px;flex-shrink:0;}
+
+/* Navigation buttons grid */
+.res-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:480px;margin-top:4px;flex-shrink:0;}
+.rbtn{
+  padding:9px 10px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Cairo',sans-serif;font-size:11.5px;font-weight:700;
+  line-height:1.4;transition:all .2s;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.rbtn .rbtn-tag{font-size:9.5px;font-weight:600;opacity:.8;margin-top:1px;}
+.rbtn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.15);}
+.rbtn:disabled{opacity:.32;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+
+/* Retry button */
+.rbtn-retry{
+  background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;
+  width:100%;padding:12px 16px;font-size:13px;
+  box-shadow:0 4px 16px rgba(220,38,38,.3);
+}
+.rbtn-retry:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(220,38,38,.4);}
+
+/* Button colour variants */
+.rbtn-a{background:linear-gradient(135deg,#16a34a,#14b8a6);color:#fff;}  /* مستقل + ثابت  */
+.rbtn-b{background:linear-gradient(135deg,#0e7490,#6366f1);color:#fff;}  /* مستقل + مرن   */
+.rbtn-c{background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;}  /* مستقل + مرن (alt) */
+.rbtn-d{background:linear-gradient(135deg,#d97706,#dc2626);color:#fff;}  /* معتمد + مرن   */
+
+/* Score range info box */
+.score-info{
+  background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;
+  padding:6px 12px;font-size:11px;color:#15803d;font-weight:600;
+  flex-shrink:0;width:100%;max-width:480px;text-align:center;
+}
+.score-info.dep-info{background:#fff7ed;border-color:#fed7aa;color:#c2410c;}
+
+/* Instruction steps */
+.ist{display:none;flex-direction:column;height:100%;}
+.ist.on{display:flex}
+
+/* Responsive */
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr;overflow-y:auto}
+  html,body{overflow:auto;height:auto}
+  .card{min-height:380px}
+  .sup-b{position:static;transform:none;display:inline-block;margin-bottom:4px}
+  .hdr{padding-top:6px}
+  .hdr-t{max-width:100%;font-size:12px}
+}
+
+.nav a.active{background:#fff;color:#1b5e5e;border-color:#fff;}
+
+/* ===== شعارات الهيدر: الجامعة يمين / الكلية يسار ===== */
+.header,.hdr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:48px;position:relative;}
+.brand-logos{position:absolute;top:0;bottom:0;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;direction:rtl;}
+.brand-logo{height:36px;width:auto;background:#fff;border-radius:9px;padding:2px 4px;box-shadow:0 2px 8px rgba(0,0,0,.25);object-fit:contain;}
+.brand-uni{border-radius:50%;padding:2px;}
+.header .support-badge,.header .sbdg,.hdr .sup-b{position:static!important;transform:none!important;display:inline-block;margin-top:3px;}
+@media (min-width:769px){
+  .header-title,.hdr-t,.ht{max-width:min(70%,calc(100% - 270px))!important;}
+}
+@media (max-width:768px){
+  .brand-logos{position:static;width:100%;padding:0 4px;margin-bottom:4px;}
+  .brand-logo{height:30px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+<div class="brand-logos"><img class="brand-logo brand-uni" src="data:image/png;base64,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" alt="شعار جامعة الزقازيق"><img class="brand-logo brand-col" src="data:image/jpeg;base64,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" alt="شعار كلية التربية النوعية"></div>
+  <div class="hdr-t">بيئة التعلم المدمج لتنمية مهارات إنتاج الدروس التفاعلية — اختبار الأشكال المتضمنة</div>
+</div>
+<nav class="nav">
+  <a href="index.html">🏠 الرئيسية</a>
+  <a href="aims.html">🎯 أهداف البيئة</a>
+  <a href="guied.html">📚 دليل التعلم</a>
+  <a href="mods.html">📖 المحتوى التعليمي</a>
+  <a href="pretest.html">📝 التقويم</a>
+  <a href="trian.html" class="active">🧩 اختبار أساليب التعلم</a>
+  <a href="contact.html">📞 اتصل بنا</a>
+</nav>
+
+
+
+<!-- ========== شاشة التعليمات المستقلة (تظهر أولاً بملء الشاشة) ========== -->
+<div class="instr-overlay" id="instrOverlay">
+  <div class="card">
+    <div class="card-h">📋 تعليمات</div>
+    <div class="card-b">
+
+      <!-- Step 1: Goals + Sections -->
+      <div class="ist on" id="s1">
+        <div class="sec-num">الخطوة ١ من ٣</div>
+        <div class="sec-head">🎯 الهدف والأقسام</div>
+        <div class="inst-body">
+          <div class="box-g">💡 <strong>الهدف:</strong> اكتشاف شكل بسيط مخفي داخل شكل معقد وتحديد حدوده بالماوس.</div>
+          <ul>
+            <li><strong>القسم الأول — تدريب:</strong> ٧ أشكال / دقيقتان (لا تُحسب)</li>
+            <li><strong>القسم الثاني:</strong> ٩ أشكال / ٥ دقائق</li>
+            <li><strong>القسم الثالث:</strong> ٩ أشكال / ٥ دقائق</li>
+          </ul>
+          <div class="box-y">⏱️ الزمن يبدأ تلقائياً عند انتقالك لكل قسم.</div>
+        </div>
+      </div>
+
+      <!-- Step 2: How to answer + example -->
+      <div class="ist" id="s2">
+        <div class="sec-num">الخطوة ٢ من ٣</div>
+        <div class="sec-head">✏️ طريقة الإجابة</div>
+        <div class="inst-body">
+          <ul>
+            <li>ستظهر لك <strong>الشكل البسيط</strong> ثم الشكل المعقد.</li>
+            <li>اسحب بالماوس لرسم حدود الشكل البسيط <strong>داخل</strong> الشكل المعقد.</li>
+            <li>إذا أخطأت: اضغط <strong>مسح</strong> وأعد الرسم.</li>
+            <li>الشكل البسيط موجود <strong>بنفس الحجم والاتجاه</strong>.</li>
+          </ul>
+          <div class="ex-row">
+            <div style="text-align:center">
+              <svg width="60" height="60" viewBox="0 0 60 60">
+                <polygon points="30,4 56,56 4,56" fill="none" stroke="#1b6b5a" stroke-width="2.5" stroke-linejoin="round"/>
+              </svg>
+              <div style="font-size:10px;color:#6b7280;margin-top:2px">الشكل البسيط</div>
+            </div>
+            <div style="font-size:18px;color:#9ca3af">←</div>
+            <div style="text-align:center">
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                <rect x="6" y="24" width="72" height="62" fill="none" stroke="#374151" stroke-width="1.7"/>
+                <line x1="6" y1="24" x2="45" y2="5" stroke="#374151" stroke-width="1.7"/>
+                <line x1="78" y1="24" x2="45" y2="5" stroke="#374151" stroke-width="1.7"/>
+                <line x1="6" y1="24" x2="78" y2="86" stroke="#374151" stroke-width="1.2"/>
+                <line x1="78" y1="24" x2="6" y2="86" stroke="#374151" stroke-width="1.2"/>
+                <polygon points="45,5 73,52 17,52" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="5,3" stroke-linejoin="round"/>
+              </svg>
+              <div style="font-size:10px;color:#16a34a;margin-top:2px">✅ الإجابة الصحيحة</div>
+            </div>
+          </div>
+          <div class="box-g" style="font-size:11px">الحدود الخضراء = مكان الشكل البسيط داخل الشكل المعقد</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Scoring -->
+      <div class="ist" id="s3">
+        <div class="sec-num">الخطوة ٣ من ٣</div>
+        <div class="sec-head">🚀 ابدأ الآن</div>
+        <div class="inst-body">
+          <ul>
+            <li>⏱️ يوجد <strong>مؤقت</strong> لكل قسم: دقيقتان للتدريب، و٥ دقائق لكل من القسم الثاني والثالث.</li>
+            <li>✅ إذا انتهيت من الإجابة قبل نفاد الوقت، اضغط <strong>"تأكيد الإجابة"</strong> مباشرة ولا تنتظر انتهاء المؤقت.</li>
+            <li>⏰ إذا نفد الوقت قبل أن تُجيب: يُسجَّل السؤال تلقائياً وتظهر <strong>الإجابة الصحيحة مرسومة</strong> باللون الأخضر.</li>
+            <li>بعد كل الأسئلة ستظهر <strong>نتيجتك وتصنيفك</strong>.</li>
+            <li>النتيجة تُبنى على القسمين الثاني والثالث فقط.</li>
+          </ul>
+          <div class="box-y">⚠️ يبدأ مؤقت كل قسم تلقائياً بمجرد دخولك إليه.</div>
+          <div class="box-g">🖥️ إذا لاحظت ظهور شريط تمرير (Scroll) أو أن أي جزء من عناصر الاختبار مقصوص: قم بتصغير حجم التكبير في المتصفح (Browser Zoom) بالضغط على <strong>Ctrl</strong> و<strong>−</strong> معًا (أو <strong>⌘</strong> و<strong>−</strong> على ماك) خطوة تلو الأخرى حتى تظهر الصفحة كاملة بدون تمرير.</div>
+
+          <!-- Simple shapes reference -->
+          <div class="sec-head" style="margin-top:10px">📐 الأشكال البسيطة</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px" id="refShapes"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px">
+          <button class="bstart" onclick="startTest()">▶️ ابدأ الاختبار</button>
+        </div>
+      </div>
+
+      <div class="inav">
+        <button class="btn bsec" id="prevB" onclick="goStep(-1)" disabled>◀ السابق</button>
+        <div class="dots">
+          <div class="dot on" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+        </div>
+        <button class="btn bpri" id="nextB" onclick="goStep(1)">التالي ▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- ========== منطقة الاختبار (تملأ الشاشة بعد إغلاق شاشة التعليمات) ========== -->
+  <div class="card" style="flex:1;">
+    <div class="card-h">🖊️ منطقة الاختبار</div>
+    <div class="card-b">
+
+      <!-- Waiting -->
+      <div class="wait" id="waitEl">
+        <div style="font-size:44px">📝</div>
+        <div><strong>اقرأ التعليمات أولاً</strong></div>
+        <div style="font-size:11.5px">ثم اضغط "ابدأ الاختبار" في شاشة التعليمات</div>
+      </div>
+
+      <!-- Section break -->
+      <div class="sbk" id="sbkEl">
+        <div style="font-size:38px" id="sbkIco">⏭️</div>
+        <h2 id="sbkTitle">انتهى القسم</h2>
+        <p id="sbkMsg">استعد للقسم التالي</p>
+        <button class="bstart" onclick="continueSection()">▶️ ابدأ القسم التالي</button>
+      </div>
+
+      <!-- Active Test -->
+      <div class="tarea" id="tstEl" style="display:none">
+        <div class="prow" id="prow"></div>
+        <div class="srow">
+          <div class="stag" id="stag">القسم الأول</div>
+          <div class="qct" id="qct">السؤال ١ من ٧</div>
+        </div>
+        <div class="tdisp" id="tdisp">⏱️ <span id="tval">--:--</span></div>
+        <div class="ttrack"><div class="tfill" id="tfill" style="width:100%"></div></div>
+
+        <div class="qarea">
+          <div class="qlbl" id="qlbl"></div>
+          <div class="shrow">
+            <div class="sbox">
+              <label>الشكل البسيط</label>
+              <canvas id="simC" width="100" height="100"></canvas>
+            </div>
+            <div style="font-size:22px;color:#9ca3af;padding-bottom:12px">←</div>
+            <div class="sbox">
+              <label>ارسم حدود الشكل البسيط هنا ↓</label>
+              <canvas id="tstC" width="340" height="280"></canvas>
+            </div>
+          </div>
+          <div class="chint">🖱️ اضغط واسحب بالماوس لرسم حدود الشكل البسيط داخل الشكل المعقد</div>
+          <div class="fb" id="fbEl"></div>
+        </div>
+
+        <div class="arow">
+          <button class="btn bred" onclick="clearDraw()">🗑️ مسح</button>
+          <button class="btn bgrn" id="subBtn" onclick="submitAns()">✅ تأكيد الإجابة</button>
+          <button class="btn bpri" id="nxtBtn" onclick="nextQ()">⏭️ تخطي والتالي ◀</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="res" id="resEl">
+        <div class="ric" id="rIco">🏆</div>
+        <div class="rtitle">انتهى الاختبار!</div>
+        <div class="rscore" id="rScr"></div>
+        <div class="rbadge" id="rBdg"></div>
+        <div class="score-info" id="scoreInfo"></div>
+        <div class="rdet" id="rDet"></div>
+        <!-- زر إعادة الاختبار — يظهر فقط عند الحصول على صفر -->
+        <div id="retryBox" style="display:none;width:100%;max-width:480px;text-align:center;">
+          <button class="rbtn rbtn-retry" id="retryBtn" onclick="restartTest()">
+            🔄 إعادة الاختبار
+            <span class="rbtn-tag">درجتك خارج المدى المحدد — حاول مجدداً</span>
+          </button>
+        </div>
+
+        <div class="res-btns" id="resBtns" style="display:block;text-align:center;">
+          <div id="autoRouteMsg" style="font-size:12.5px;color:#065f46;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:8px 12px;margin-bottom:8px;"></div>
+          <button class="rbtn" id="goEnvBtn" onclick="goToAssignedEnv()" style="width:100%;display:none;">🚀 انتقل الآن إلى بيئة التعلم المناسبة</button>
+        </div>
+        <div id="adminLinks" style="display:none">
+          <span id="urlA">https://worledtecnology-spec.github.io/Fixed-Support--g1/</span>
+          <span id="urlB">https://worledtecnology-spec.github.io/Fixed-Support--g2/</span>
+          <span id="urlC">https://worledtecnology-spec.github.io/Flexible-Support---g3/</span>
+          <span id="urlD">https://worledtecnology-spec.github.io/Flexible-Support---g4/</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+/* ── إعداد Firebase (عدّاد متوازن مضمون لنمط الدعم) ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDc8YHgGfZl5Rc97sLFI0NI-No9KrYWy1c",
+  authDomain: "trian-support.firebaseapp.com",
+  databaseURL: "https://trian-support-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "trian-support",
+  storageBucket: "trian-support.firebasestorage.app",
+  messagingSenderId: "65202851992",
+  appId: "1:65202851992:web:7f8fa7fa816d2c3f31c0ed"
+};
+let _fbReady = false;
+try{
+  firebase.initializeApp(firebaseConfig);
+  _fbReady = true;
+}catch(e){
+  _fbReady = false; /* لو فشل التحميل (مثلاً بدون إنترنت) هيشتغل بالنسخة الاحتياطية المحلية تلقائيًا */
+}
+</script>
+<script>
+/* ================================================================
+   SIMPLE SHAPE DRAWING FUNCTIONS
+   Based exactly on the image provided (الأشكال البسيطة):
+   ب = T-shape,  ز = crown,  س = envelope/X-square,  هـ = cube-top-face
+   ج = small-3d-cube,  و = triangle/arrowhead,  ل = rectangle
+   د = house,  ح = trapezoid,  ع = cross-plus,  ف = notched-rect
+   Also: hexagon (ق), perspective diamond (م)
+================================================================ */
+const SH = {
+  /* ب — T شكل حرف T */
+  T(c,W,H,cl){
+    cl=cl||'#1b6b5a';
+    c.beginPath();
+    c.moveTo(W*.16,H*.13);c.lineTo(W*.84,H*.13);
+    c.lineTo(W*.84,H*.43);c.lineTo(W*.62,H*.43);
+    c.lineTo(W*.62,H*.87);c.lineTo(W*.38,H*.87);
+    c.lineTo(W*.38,H*.43);c.lineTo(W*.16,H*.43);
+    c.closePath();
+    c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';c.stroke();
+  },
+  /* ز — crown / zigzag */
+  crown(c,W,H,cl){
+    cl=cl||'#1b6b5a';
+    c.beginPath();
+    c.moveTo(W*.07,H*.88);c.lineTo(W*.07,H*.38);
+    c.lineTo(W*.28,H*.16);c.lineTo(W*.5,H*.38);
+    c.lineTo(W*.72,H*.16);c.lineTo(W*.93,H*.38);
+    c.lineTo(W*.93,H*.88);c.closePath();
+    c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';c.stroke();
+  },
+  /* س — square with X diagonals (envelope) */
+  envelope(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.strokeRect(W*.1,H*.1,W*.8,H*.8);
+    c.beginPath();c.moveTo(W*.1,H*.1);c.lineTo(W*.9,H*.9);c.stroke();
+    c.beginPath();c.moveTo(W*.9,H*.1);c.lineTo(W*.1,H*.9);c.stroke();
+  },
+  /* هـ — cube top rhombus face */
+  cubeTop(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.5,H*.08);c.lineTo(W*.9,H*.32);
+    c.lineTo(W*.5,H*.56);c.lineTo(W*.1,H*.32);
+    c.closePath();c.stroke();
+  },
+  /* ج — small 3-D cube */
+  cube3d(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    // front face
+    c.strokeRect(W*.12,H*.36,W*.46,H*.46);
+    // top face
+    c.beginPath();
+    c.moveTo(W*.12,H*.36);c.lineTo(W*.38,H*.14);
+    c.lineTo(W*.82,H*.14);c.lineTo(W*.58,H*.36);c.stroke();
+    // right face
+    c.beginPath();
+    c.moveTo(W*.58,H*.36);c.lineTo(W*.82,H*.14);
+    c.lineTo(W*.82,H*.6);c.lineTo(W*.58,H*.82);c.stroke();
+  },
+  /* و — triangle */
+  tri(c,W,H,cl){
+    cl=cl||'#1b6b5a';
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.88,H*.9);c.lineTo(W*.12,H*.9);c.closePath();
+    c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';c.stroke();
+  },
+  /* ل — horizontal rectangle */
+  rect(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;
+    c.strokeRect(W*.06,H*.3,W*.88,H*.4);
+  },
+  /* د — house pentagon */
+  house(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.07);c.lineTo(W*.93,H*.42);
+    c.lineTo(W*.93,H*.93);c.lineTo(W*.07,H*.93);c.lineTo(W*.07,H*.42);c.closePath();c.stroke();
+  },
+  /* ح — trapezoid */
+  trap(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.22,H*.22);c.lineTo(W*.78,H*.22);
+    c.lineTo(W*.94,H*.78);c.lineTo(W*.06,H*.78);c.closePath();c.stroke();
+  },
+  /* ع — plus/cross */
+  plus(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.35,H*.06);c.lineTo(W*.65,H*.06);c.lineTo(W*.65,H*.35);
+    c.lineTo(W*.94,H*.35);c.lineTo(W*.94,H*.65);c.lineTo(W*.65,H*.65);
+    c.lineTo(W*.65,H*.94);c.lineTo(W*.35,H*.94);c.lineTo(W*.35,H*.65);
+    c.lineTo(W*.06,H*.65);c.lineTo(W*.06,H*.35);c.lineTo(W*.35,H*.35);
+    c.closePath();c.stroke();
+  },
+  /* ف — rectangle with notch (crown-rect / stadium) */
+  notchRect(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.06,H*.22);c.lineTo(W*.94,H*.22);
+    c.lineTo(W*.94,H*.78);c.lineTo(W*.62,H*.78);c.lineTo(W*.62,H*.56);
+    c.lineTo(W*.38,H*.56);c.lineTo(W*.38,H*.78);c.lineTo(W*.06,H*.78);
+    c.closePath();c.stroke();
+  },
+  /* hexagon */
+  hex(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();
+    const r=W*.42,cx=W*.5,cy=H*.5;
+    for(let i=0;i<6;i++){
+      const a=Math.PI/3*i-Math.PI/6;
+      i===0?c.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):c.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    }
+    c.closePath();c.stroke();
+  },
+  /* star */
+  star(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2;c.lineJoin='round';
+    c.beginPath();
+    for(let i=0;i<10;i++){
+      const a=Math.PI/5*i-Math.PI/2,r=i%2===0?W*.44:W*.2;
+      const x=W*.5+Math.cos(a)*r,y=H*.5+Math.sin(a)*r;
+      i===0?c.moveTo(x,y):c.lineTo(x,y);
+    }
+    c.closePath();c.stroke();
+  },
+  /* perspective box (diamond on top) */
+  perspTop(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.5,H*.08);c.lineTo(W*.9,H*.34);
+    c.lineTo(W*.5,H*.6);c.lineTo(W*.1,H*.34);c.closePath();c.stroke();
+  },
+  /* shelves (3 stacked rects) */
+  shelves(c,W,H,cl){
+    cl=cl||'#1b6b5a';c.strokeStyle=cl;c.lineWidth=2.5;
+    for(let i=0;i<3;i++) c.strokeRect(W*.1,H*(.1+i*.28),W*.8,H*.25);
+  }
+};
+
+/* ================================================================
+   COMPLEX SHAPE DRAWERS — draw the complex/embedded figure
+================================================================ */
+const CX = {
+  /* Complex 1: large diamond with internal lines — T hidden inside */
+  cx_T_diamond(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.96,H*.5);c.lineTo(W*.5,H*.96);c.lineTo(W*.04,H*.5);c.closePath();c.stroke();
+    [[W*.5,H*.04,W*.5,H*.96],[W*.04,H*.5,W*.96,H*.5],
+     [W*.26,H*.26,W*.74,H*.26],[W*.26,H*.74,W*.74,H*.74],
+     [W*.26,H*.26,W*.74,H*.74],[W*.74,H*.26,W*.26,H*.74]].forEach(([x1,y1,x2,y2])=>{
+      c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+    });
+  },
+  /* Complex 2: square with both diagonals + grid — crown hidden */
+  cx_crown_sqgrid(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.strokeRect(W*.06,H*.06,W*.88,H*.88);
+    c.strokeRect(W*.22,H*.22,W*.56,H*.56);
+    c.beginPath();c.moveTo(W*.06,H*.06);c.lineTo(W*.94,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.94,H*.06);c.lineTo(W*.06,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.5,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.5);c.lineTo(W*.94,H*.5);c.stroke();
+  },
+  /* Complex 3: large square + inner square — envelope hidden */
+  cx_envelope_sq(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.strokeRect(W*.05,H*.05,W*.9,H*.9);
+    c.strokeRect(W*.25,H*.25,W*.5,H*.5);
+    c.beginPath();c.moveTo(W*.05,H*.05);c.lineTo(W*.95,H*.95);c.stroke();
+    c.beginPath();c.moveTo(W*.95,H*.05);c.lineTo(W*.05,H*.95);c.stroke();
+  },
+  /* Complex 4: 3D cube body — cubeTop hidden as top face */
+  cx_cubeTop_3dcube(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.strokeRect(W*.06,H*.32,W*.6,H*.6);
+    c.beginPath();c.moveTo(W*.06,H*.32);c.lineTo(W*.38,H*.06);c.lineTo(W*.92,H*.06);c.lineTo(W*.66,H*.32);c.stroke();
+    c.beginPath();c.moveTo(W*.66,H*.32);c.lineTo(W*.92,H*.06);c.lineTo(W*.92,H*.66);c.lineTo(W*.66,H*.92);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.32);c.lineTo(W*.66,H*.32);c.stroke();
+    c.beginPath();c.moveTo(W*.38,H*.06);c.lineTo(W*.5,H*.5);c.stroke();
+    c.beginPath();c.moveTo(W*.92,H*.06);c.lineTo(W*.5,H*.5);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.32);c.lineTo(W*.5,H*.5);c.stroke();
+  },
+  /* Complex 5: big 3D cube — small cube hidden */
+  cx_cube3d_big(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.strokeRect(W*.06,H*.34,W*.56,H*.58);
+    c.beginPath();c.moveTo(W*.06,H*.34);c.lineTo(W*.38,H*.06);c.lineTo(W*.9,H*.06);c.lineTo(W*.62,H*.34);c.stroke();
+    c.beginPath();c.moveTo(W*.62,H*.34);c.lineTo(W*.9,H*.06);c.lineTo(W*.9,H*.64);c.lineTo(W*.62,H*.92);c.stroke();
+    c.strokeRect(W*.2,H*.5,W*.22,H*.2);
+    c.beginPath();c.moveTo(W*.42,H*.34);c.lineTo(W*.42,H*.92);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.6);c.lineTo(W*.62,H*.6);c.stroke();
+  },
+  /* Complex 6: triangle with inner lines — triangle hidden */
+  cx_tri_inner(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.94,H*.96);c.lineTo(W*.06,H*.96);c.closePath();c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.5,H*.96);c.stroke();
+    c.beginPath();c.moveTo(W*.28,H*.5);c.lineTo(W*.72,H*.5);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.28,H*.5);c.lineTo(W*.72,H*.5);c.closePath();c.stroke();
+    // extra lines
+    c.beginPath();c.moveTo(W*.5,H*.5);c.lineTo(W*.94,H*.96);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.5);c.lineTo(W*.06,H*.96);c.stroke();
+  },
+  /* Complex 7: irregular hexagon — rectangle hidden */
+  cx_rect_hexagon(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.1,H*.22);c.lineTo(W*.9,H*.16);c.lineTo(W*.96,H*.58);
+    c.lineTo(W*.82,H*.84);c.lineTo(W*.12,H*.88);c.lineTo(W*.04,H*.52);c.closePath();c.stroke();
+    c.beginPath();c.moveTo(W*.1,H*.5);c.lineTo(W*.9,H*.5);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.16);c.lineTo(W*.5,H*.84);c.stroke();
+    c.beginPath();c.moveTo(W*.1,H*.22);c.lineTo(W*.9,H*.84);c.stroke();
+  },
+  /* CX SEC2-1: concentric diamonds — star hidden */
+  cx_star_diamonds(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    [W*.44,W*.3,W*.15].forEach(r=>{
+      c.beginPath();c.moveTo(W*.5,H*.5-r);c.lineTo(W*.5+r,H*.5);c.lineTo(W*.5,H*.5+r);c.lineTo(W*.5-r,H*.5);c.closePath();c.stroke();
+    });
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.5,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.5);c.lineTo(W*.94,H*.5);c.stroke();
+  },
+  /* CX SEC2-2: 2 skewed parallelograms (distractors) + 1 genuine unskewed rectangle — rect hidden */
+  cx_rect_para(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    [[W*.06,H*.06,W*.4,H*.28,W*.1],[W*.28,H*.36,W*.4,H*.28,0],[W*.5,H*.66,W*.4,H*.28,W*.1]].forEach(([x,y,w,h,sk])=>{
+      c.beginPath();c.moveTo(x+sk,y);c.lineTo(x+w+sk,y);c.lineTo(x+w,y+h);c.lineTo(x,y+h);c.closePath();c.stroke();
+    });
+  },
+  /* CX SEC2-3: square with radial lines from corner — crown hidden */
+  cx_crown_sunburst(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.strokeRect(W*.06,H*.06,W*.88,H*.88);
+    for(let i=0;i<12;i++){
+      const a=i/12*Math.PI*2;
+      c.beginPath();c.moveTo(W*.94,H*.94);c.lineTo(W*.94+Math.cos(a)*W*1.3,H*.94+Math.sin(a)*H*1.3);c.stroke();
+    }
+    c.beginPath();c.moveTo(W*.06,H*.06);c.lineTo(W*.94,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.94,H*.06);c.lineTo(W*.06,H*.94);c.stroke();
+  },
+  /* CX SEC2-4: vertical-line grid (distractor) + genuine shelves shape hidden within it */
+  cx_shelves_grid(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.6;
+    for(let i=0;i<=4;i++){
+      const v=W*(.08+i*.21);
+      c.beginPath();c.moveTo(v,H*.06);c.lineTo(v,H*.94);c.stroke();
+    }
+    c.lineWidth=2;c.strokeRect(W*.06,H*.06,W*.88,H*.88);
+    /* الشكل البسيط الحقيقي (الرفوف) — نفس أبعاد SH.shelves تمامًا */
+    c.lineWidth=1.6;
+    for(let i=0;i<3;i++) c.strokeRect(W*.1,H*(.1+i*.28),W*.8,H*.25);
+  },
+  /* CX SEC2-5: octagon with diagonals — T hidden */
+  cx_T_octagon(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    const p=[[.5,.04],[.82,.18],[.96,.5],[.82,.82],[.5,.96],[.18,.82],[.04,.5],[.18,.18]];
+    c.beginPath();c.moveTo(W*p[0][0],H*p[0][1]);p.forEach(q=>c.lineTo(W*q[0],H*q[1]));c.closePath();c.stroke();
+    [[W*.04,H*.5,W*.96,H*.5],[W*.5,H*.04,W*.5,H*.96],[W*.18,H*.18,W*.82,H*.82],[W*.82,H*.18,W*.18,H*.82]].forEach(([x1,y1,x2,y2])=>{
+      c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+    });
+  },
+  /* CX SEC2-6: cross/plus shape with hatch — trap hidden */
+  cx_trap_cross(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();
+    c.moveTo(W*.34,H*.06);c.lineTo(W*.66,H*.06);c.lineTo(W*.66,H*.34);c.lineTo(W*.94,H*.34);
+    c.lineTo(W*.94,H*.66);c.lineTo(W*.66,H*.66);c.lineTo(W*.66,H*.94);c.lineTo(W*.34,H*.94);
+    c.lineTo(W*.34,H*.66);c.lineTo(W*.06,H*.66);c.lineTo(W*.06,H*.34);c.lineTo(W*.34,H*.34);
+    c.closePath();c.stroke();
+    c.globalAlpha=.12;
+    for(let i=-4;i<10;i++){c.beginPath();c.moveTo(W*i*.15,0);c.lineTo(W*(i*.15+1),H);c.stroke();}
+    c.globalAlpha=1;
+  },
+  /* CX SEC2-7: house with detail — house hidden */
+  cx_house_detail(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.93,H*.4);c.lineTo(W*.93,H*.93);c.lineTo(W*.07,H*.93);c.lineTo(W*.07,H*.4);c.closePath();c.stroke();
+    c.strokeRect(W*.14,H*.54,W*.2,H*.2);c.strokeRect(W*.66,H*.54,W*.2,H*.2);
+    c.strokeRect(W*.38,H*.58,W*.24,H*.35);
+    c.beginPath();c.moveTo(W*.07,H*.4);c.lineTo(W*.93,H*.4);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.5,H*.4);c.stroke();
+  },
+  /* CX SEC2-8: hexagon with hatching — trap hidden */
+  cx_trap_hex(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.9,H*.28);c.lineTo(W*.9,H*.72);c.lineTo(W*.5,H*.94);c.lineTo(W*.1,H*.72);c.lineTo(W*.1,H*.28);c.closePath();c.stroke();
+    c.globalAlpha=.2;for(let i=0;i<7;i++){c.beginPath();c.moveTo(W*.1,H*(.14+i*.12));c.lineTo(W*.9,H*(.14+i*.12));c.stroke();}c.globalAlpha=1;
+    c.beginPath();c.moveTo(W*.1,H*.28);c.lineTo(W*.9,H*.72);c.stroke();
+  },
+  /* CX SEC2-9: hexagon/rounded hex — hex hidden */
+  cx_hex_rounded(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.9,H*.3);c.lineTo(W*.9,H*.7);c.lineTo(W*.5,H*.94);c.lineTo(W*.1,H*.7);c.lineTo(W*.1,H*.3);c.closePath();c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.06);c.lineTo(W*.5,H*.94);c.stroke();
+    c.beginPath();c.moveTo(W*.1,H*.3);c.lineTo(W*.9,H*.7);c.stroke();
+    c.beginPath();c.moveTo(W*.9,H*.3);c.lineTo(W*.1,H*.7);c.stroke();
+    c.globalAlpha=.18;for(let i=0;i<8;i++){c.beginPath();c.moveTo(W*.1,H*(.1+i*.11));c.lineTo(W*.9,H*(.1+i*.11));c.stroke();}c.globalAlpha=1;
+  },
+  /* SEC3 CX shapes */
+  cx_tri_starburst(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    for(let i=0;i<10;i++){
+      const a1=i/10*Math.PI*2,a2=(i+.5)/10*Math.PI*2;
+      c.beginPath();c.moveTo(W*.5,H*.5);c.lineTo(W*.5+Math.cos(a1)*W*.46,H*.5+Math.sin(a1)*H*.46);c.lineTo(W*.5+Math.cos(a2)*W*.22,H*.5+Math.sin(a2)*H*.22);c.stroke();
+    }
+  },
+  cx_crown_diaghatch(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.strokeRect(W*.06,H*.06,W*.88,H*.88);
+    c.globalAlpha=.15;for(let i=-4;i<10;i++){c.beginPath();c.moveTo(W*i*.15,0);c.lineTo(W*(i*.15+1),H);c.stroke();c.beginPath();c.moveTo(W*i*.15,H);c.lineTo(W*(i*.15+1),0);c.stroke();}c.globalAlpha=1;
+    c.beginPath();c.moveTo(W*.06,H*.06);c.lineTo(W*.94,H*.94);c.stroke();
+  },
+  cx_cube_roof3d(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.strokeRect(W*.06,H*.36,W*.56,H*.58);
+    c.beginPath();c.moveTo(W*.06,H*.36);c.lineTo(W*.38,H*.06);c.lineTo(W*.9,H*.06);c.lineTo(W*.62,H*.36);c.stroke();
+    c.beginPath();c.moveTo(W*.62,H*.36);c.lineTo(W*.9,H*.06);c.lineTo(W*.9,H*.64);c.lineTo(W*.62,H*.92);c.stroke();
+    c.strokeRect(W*.18,H*.52,W*.2,H*.18);
+  },
+  cx_shelves_xgrid(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.6;c.strokeRect(W*.04,H*.04,W*.92,H*.92);
+    for(let i=1;i<4;i++){const x=W*(.04+i*.23);c.beginPath();c.moveTo(x,H*.04);c.lineTo(x,H*.96);c.stroke();}
+    c.globalAlpha=.22;for(let i=-3;i<6;i++){c.beginPath();c.moveTo(W*i*.25,0);c.lineTo(W*(i*.25+1),H);c.stroke();c.beginPath();c.moveTo(W*i*.25,H);c.lineTo(W*(i*.25+1),0);c.stroke();}c.globalAlpha=1;
+  },
+  cx_plus_shelfgrid(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.strokeRect(W*.06,H*.06,W*.88,H*.88);
+    for(let r=1;r<4;r++){const y=H*(.06+r*.22);c.beginPath();c.moveTo(W*.06,y);c.lineTo(W*.94,y);c.stroke();}
+    c.beginPath();c.moveTo(W*.38,H*.06);c.lineTo(W*.38,H*.94);c.stroke();
+  },
+  cx_shelves_parahatch(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.06,H*.32);c.lineTo(W*.76,H*.06);c.lineTo(W*.94,H*.68);c.lineTo(W*.24,H*.94);c.closePath();c.stroke();
+    c.globalAlpha=.18;for(let i=-3;i<8;i++){c.beginPath();c.moveTo(W*i*.16,0);c.lineTo(W*(i*.16+1),H);c.stroke();}c.globalAlpha=1;
+  },
+  cx_rect_openbox(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.strokeRect(W*.06,H*.24,W*.76,H*.62);
+    c.beginPath();c.moveTo(W*.06,H*.24);c.lineTo(W*.32,H*.06);c.lineTo(W*.92,H*.06);c.lineTo(W*.82,H*.24);c.stroke();
+    c.beginPath();c.moveTo(W*.82,H*.24);c.lineTo(W*.92,H*.06);c.lineTo(W*.92,H*.64);c.lineTo(W*.82,H*.86);c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.24);c.lineTo(W*.5,H*.54);c.stroke();
+    c.beginPath();c.moveTo(W*.82,H*.24);c.lineTo(W*.5,H*.54);c.stroke();
+  },
+  cx_rect_diagbox(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;
+    c.strokeRect(W*.06,H*.22,W*.88,H*.56);
+    c.beginPath();c.moveTo(W*.06,H*.22);c.lineTo(W*.94,H*.78);c.stroke();
+    c.beginPath();c.moveTo(W*.94,H*.22);c.lineTo(W*.06,H*.78);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.22);c.lineTo(W*.5,H*.78);c.stroke();
+  },
+  cx_notch_diamhatch(c,W,H){
+    c.strokeStyle='#374151';c.lineWidth=1.8;c.lineJoin='round';
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.94,H*.5);c.lineTo(W*.5,H*.96);c.lineTo(W*.06,H*.5);c.closePath();c.stroke();
+    c.beginPath();c.moveTo(W*.06,H*.5);c.lineTo(W*.94,H*.5);c.stroke();
+    c.beginPath();c.moveTo(W*.5,H*.04);c.lineTo(W*.5,H*.96);c.stroke();
+    c.globalAlpha=.17;for(let i=-4;i<8;i++){c.beginPath();c.moveTo(W*i*.15,0);c.lineTo(W*(i*.15+1),H);c.stroke();c.beginPath();c.moveTo(W*i*.15,H);c.lineTo(W*(i*.15+1),0);c.stroke();}c.globalAlpha=1;
+  }
+};
+
+/* ================================================================
+   QUESTIONS DATA
+   sf  = simple shape function (what the student must find)
+   cf  = complex shape function (the embedded figure)
+   ans = correct polygon [{x,y}] in 0..1 — THIS IS WHAT GETS DRAWN IN GREEN
+   lbl = question label
+================================================================ */
+const Q = [
+  // ===== SEC 1 — TRAINING (7q, 120s) =====
+  { sec:1, sf:SH.T,       cf:CX.cx_T_diamond,
+    lbl:'(١) وضح حدود الشكل البسيط (ب) داخل الشكل المعقد',
+    ans:[{x:.16,y:.14},{x:.84,y:.14},{x:.84,y:.43},{x:.62,y:.43},{x:.62,y:.86},{x:.38,y:.86},{x:.38,y:.43},{x:.16,y:.43}]
+  },
+  { sec:1, sf:SH.crown,   cf:CX.cx_crown_sqgrid,
+    lbl:'(٢) وضح حدود الشكل البسيط (ز) داخل الشكل المعقد',
+    ans:[{x:.07,y:.88},{x:.07,y:.38},{x:.28,y:.16},{x:.5,y:.38},{x:.72,y:.16},{x:.93,y:.38},{x:.93,y:.88}]
+  },
+  { sec:1, sf:SH.envelope, cf:CX.cx_envelope_sq,
+    lbl:'(٣) وضح حدود الشكل البسيط (س) داخل الشكل المعقد',
+    ans:[{x:.1,y:.1},{x:.9,y:.1},{x:.9,y:.9},{x:.1,y:.9}]
+  },
+  { sec:1, sf:SH.cubeTop,  cf:CX.cx_cubeTop_3dcube,
+    lbl:'(٤) وضح حدود الشكل البسيط (هـ) داخل الشكل المعقد',
+    ans:[{x:.06,y:.32},{x:.38,y:.06},{x:.92,y:.06},{x:.66,y:.32},{x:.5,y:.5}]
+  },
+  { sec:1, sf:SH.cube3d,   cf:CX.cx_cube3d_big,
+    lbl:'(٥) وضح حدود الشكل البسيط (ج) داخل الشكل المعقد',
+    ans:[{x:.12,y:.36},{x:.58,y:.36},{x:.58,y:.82},{x:.12,y:.82}]
+  },
+  { sec:1, sf:SH.tri,      cf:CX.cx_tri_inner,
+    lbl:'(٦) وضح حدود الشكل البسيط (و) داخل الشكل المعقد',
+    ans:[{x:.5,y:.04},{x:.72,y:.5},{x:.28,y:.5}]
+  },
+  { sec:1, sf:SH.rect,     cf:CX.cx_rect_hexagon,
+    lbl:'(٧) وضح حدود الشكل البسيط (ل) داخل الشكل المعقد',
+    ans:[{x:.06,y:.32},{x:.94,y:.32},{x:.94,y:.68},{x:.06,y:.68}]
+  },
+
+  // ===== SEC 2 (9q, 300s) =====
+  { sec:2, sf:SH.star,     cf:CX.cx_star_diamonds,
+    lbl:'(١) وضح حدود الشكل البسيط (ز) داخل الشكل المعقد',
+    ans:[{x:.5,y:.06},{x:.64,y:.36},{x:.94,y:.36},{x:.72,y:.56},{x:.82,y:.9},{x:.5,y:.72},{x:.18,y:.9},{x:.28,y:.56},{x:.06,y:.36},{x:.36,y:.36}]
+  },
+  { sec:2, sf:SH.rect,     cf:CX.cx_rect_para,
+    lbl:'(٢) وضح حدود الشكل البسيط (ل) داخل الشكل المعقد',
+    ans:[{x:.28,y:.36},{x:.68,y:.36},{x:.68,y:.64},{x:.28,y:.64}]
+  },
+  { sec:2, sf:SH.crown,    cf:CX.cx_crown_sunburst,
+    lbl:'(٣) وضح حدود الشكل البسيط (ز) داخل الشكل المعقد',
+    ans:[{x:.07,y:.88},{x:.07,y:.38},{x:.28,y:.16},{x:.5,y:.38},{x:.72,y:.16},{x:.93,y:.38},{x:.93,y:.88}]
+  },
+  { sec:2, sf:SH.shelves,  cf:CX.cx_shelves_grid,
+    lbl:'(٤) وضح حدود الشكل البسيط (هـ) داخل الشكل المعقد',
+    ans:[{x:.1,y:.1},{x:.9,y:.1},{x:.9,y:.91},{x:.1,y:.91}]
+  },
+  { sec:2, sf:SH.T,        cf:CX.cx_T_octagon,
+    lbl:'(٥) وضح حدود الشكل البسيط (ب) داخل الشكل المعقد',
+    ans:[{x:.16,y:.14},{x:.84,y:.14},{x:.84,y:.43},{x:.62,y:.43},{x:.62,y:.86},{x:.38,y:.86},{x:.38,y:.43},{x:.16,y:.43}]
+  },
+  { sec:2, sf:SH.trap,     cf:CX.cx_trap_cross,
+    lbl:'(٦) وضح حدود الشكل البسيط (ح) داخل الشكل المعقد',
+    ans:[{x:.18,y:.2},{x:.82,y:.2},{x:.94,y:.78},{x:.06,y:.78}]
+  },
+  { sec:2, sf:SH.house,    cf:CX.cx_house_detail,
+    lbl:'(٧) وضح حدود الشكل البسيط (د) داخل الشكل المعقد',
+    ans:[{x:.5,y:.06},{x:.93,y:.4},{x:.93,y:.93},{x:.07,y:.93},{x:.07,y:.4}]
+  },
+  { sec:2, sf:SH.trap,     cf:CX.cx_trap_hex,
+    lbl:'(٨) وضح حدود الشكل البسيط (ح) داخل الشكل المعقد',
+    ans:[{x:.12,y:.28},{x:.88,y:.28},{x:.88,y:.72},{x:.12,y:.72}]
+  },
+  { sec:2, sf:SH.hex,      cf:CX.cx_hex_rounded,
+    lbl:'(٩) وضح حدود الشكل البسيط (ق) داخل الشكل المعقد',
+    ans:[{x:.5,y:.06},{x:.9,y:.3},{x:.9,y:.7},{x:.5,y:.94},{x:.1,y:.7},{x:.1,y:.3}]
+  },
+
+  // ===== SEC 3 (9q, 300s) =====
+  { sec:3, sf:SH.tri,      cf:CX.cx_tri_starburst,
+    lbl:'(١) وضح حدود الشكل البسيط (و) داخل الشكل المعقد',
+    ans:[{x:.5,y:.06},{x:.84,y:.84},{x:.16,y:.84}]
+  },
+  { sec:3, sf:SH.crown,    cf:CX.cx_crown_diaghatch,
+    lbl:'(٢) وضح حدود الشكل البسيط (ز) داخل الشكل المعقد',
+    ans:[{x:.07,y:.88},{x:.07,y:.36},{x:.28,y:.14},{x:.5,y:.36},{x:.72,y:.14},{x:.93,y:.36},{x:.93,y:.88}]
+  },
+  { sec:3, sf:SH.cube3d,   cf:CX.cx_cube_roof3d,
+    lbl:'(٣) وضح حدود الشكل البسيط (ج) داخل الشكل المعقد',
+    ans:[{x:.12,y:.36},{x:.58,y:.36},{x:.58,y:.82},{x:.12,y:.82}]
+  },
+  { sec:3, sf:SH.shelves,  cf:CX.cx_shelves_xgrid,
+    lbl:'(٤) وضح حدود الشكل البسيط (هـ) داخل الشكل المعقد',
+    ans:[{x:.04,y:.04},{x:.96,y:.04},{x:.96,y:.96},{x:.04,y:.96}]
+  },
+  { sec:3, sf:SH.plus,     cf:CX.cx_plus_shelfgrid,
+    lbl:'(٥) وضح حدود الشكل البسيط (ع) داخل الشكل المعقد',
+    ans:[{x:.35,y:.06},{x:.65,y:.06},{x:.65,y:.35},{x:.94,y:.35},{x:.94,y:.65},{x:.65,y:.65},{x:.65,y:.94},{x:.35,y:.94},{x:.35,y:.65},{x:.06,y:.65},{x:.06,y:.35},{x:.35,y:.35}]
+  },
+  { sec:3, sf:SH.shelves,  cf:CX.cx_shelves_parahatch,
+    lbl:'(٦) وضح حدود الشكل البسيط (هـ) داخل الشكل المعقد',
+    ans:[{x:.06,y:.06},{x:.94,y:.06},{x:.94,y:.94},{x:.06,y:.94}]
+  },
+  { sec:3, sf:SH.rect,     cf:CX.cx_rect_openbox,
+    lbl:'(٧) وضح حدود الشكل البسيط (ل) داخل الشكل المعقد',
+    ans:[{x:.06,y:.34},{x:.82,y:.34},{x:.82,y:.64},{x:.06,y:.64}]
+  },
+  { sec:3, sf:SH.rect,     cf:CX.cx_rect_diagbox,
+    lbl:'(٨) وضح حدود الشكل البسيط (ل) داخل الشكل المعقد',
+    ans:[{x:.06,y:.22},{x:.94,y:.22},{x:.94,y:.78},{x:.06,y:.78}]
+  },
+  { sec:3, sf:SH.notchRect,cf:CX.cx_notch_diamhatch,
+    lbl:'(٩) وضح حدود الشكل البسيط (ف) داخل الشكل المعقد',
+    ans:[{x:.06,y:.22},{x:.94,y:.22},{x:.94,y:.78},{x:.62,y:.78},{x:.62,y:.56},{x:.38,y:.56},{x:.38,y:.78},{x:.06,y:.78}]
+  }
+];
+
+/* ================================================================
+   SIMPLE SHAPES REFERENCE (for sidebar display)
+================================================================ */
+const SHAPE_REF = [
+  {fn:SH.T,       lbl:'ب'},
+  {fn:SH.crown,   lbl:'ز'},
+  {fn:SH.envelope,lbl:'س'},
+  {fn:SH.cubeTop, lbl:'هـ'},
+  {fn:SH.cube3d,  lbl:'ج'},
+  {fn:SH.tri,     lbl:'و'},
+  {fn:SH.rect,    lbl:'ل'},
+  {fn:SH.house,   lbl:'د'},
+  {fn:SH.trap,    lbl:'ح'},
+  {fn:SH.plus,    lbl:'ع'},
+  {fn:SH.notchRect,lbl:'ف'},
+  {fn:SH.hex,     lbl:'ق'},
+];
+
+/* Build reference shapes in sidebar */
+(function buildRef(){
+  const wrap = document.getElementById('refShapes');
+  SHAPE_REF.forEach(({fn,lbl})=>{
+    const div = document.createElement('div');
+    div.style.cssText='text-align:center';
+    const cv = document.createElement('canvas');
+    cv.width=44;cv.height=44;
+    cv.style.cssText='border:1.5px solid #c8ede4;border-radius:6px;background:#f8fffe;display:block';
+    const ctx=cv.getContext('2d');
+    fn(ctx,44,44);
+    const lb=document.createElement('div');
+    lb.style.cssText='font-size:10px;color:#6b7280;margin-top:1px;font-weight:700';
+    lb.textContent=lbl;
+    div.appendChild(cv);div.appendChild(lb);
+    wrap.appendChild(div);
+  });
+})();
+
+/* ================================================================
+   CONFIG
+================================================================ */
+const ST={1:120,2:300,3:300};
+const SL={1:'القسم الأول — تدريب',2:'القسم الثاني',3:'القسم الثالث'};
+const SQ={1:7,2:9,3:9};
+
+/* ================================================================
+   STATE
+================================================================ */
+let stepCur=1, qIdx=0, ans=[], timerInt=null, secLeft=0, secTotal=0;
+let drawing=false, path=[], answered=false, active=false, pendingNext=-1;
+
+/* ================================================================
+   INSTRUCTION NAVIGATION
+================================================================ */
+function goStep(d){
+  const ns=stepCur+d; if(ns<1||ns>3)return;
+  document.getElementById('s'+stepCur).classList.remove('on');
+  document.getElementById('d'+stepCur).classList.remove('on');
+  stepCur=ns;
+  document.getElementById('s'+stepCur).classList.add('on');
+  document.getElementById('d'+stepCur).classList.add('on');
+  document.getElementById('prevB').disabled=stepCur===1;
+  document.getElementById('nextB').disabled=stepCur===3;
+}
+
+/* ================================================================
+   TEST START
+================================================================ */
+function startTest(){
+  if(active)return; active=true;
+  document.getElementById('instrOverlay').style.display='none';
+  document.getElementById('waitEl').style.display='none';
+  document.getElementById('tstEl').style.display='flex';
+  ans=Q.map(()=>null);
+  buildProg(); loadQ(0);
+}
+
+function buildProg(){
+  const r=document.getElementById('prow'); r.innerHTML='';
+  Q.forEach((_,i)=>{const d=document.createElement('div');d.className='pd';d.id='pd'+i;r.appendChild(d);});
+}
+function updProg(){
+  Q.forEach((_,i)=>{
+    const d=document.getElementById('pd'+i); if(!d)return;
+    d.className='pd';
+    if(i===qIdx) d.classList.add('cur');
+    else if(ans[i]===true) d.classList.add('yes');
+    else if(ans[i]===false) d.classList.add('no');
+  });
+}
+
+/* ================================================================
+   LOAD QUESTION
+================================================================ */
+function loadQ(idx){
+  if(idx>=Q.length){showResults();return;}
+  qIdx=idx; answered=false; path=[];
+  const q=Q[idx];
+  document.getElementById('stag').textContent=SL[q.sec];
+  const secStart=Q.findIndex(x=>x.sec===q.sec);
+  document.getElementById('qct').textContent=`السؤال ${idx-secStart+1} من ${SQ[q.sec]}`;
+  document.getElementById('qlbl').textContent=q.lbl;
+  setFb('','');
+  document.getElementById('subBtn').style.display='';
+  var nb=document.getElementById('nxtBtn'); nb.style.display=''; nb.textContent='⏭️ تخطي والتالي ◀';
+  updProg();
+
+  const newSec=idx===0||Q[idx-1].sec!==q.sec;
+  if(newSec){clearInterval(timerInt);startTimer(ST[q.sec]);}
+
+  // Draw simple shape
+  const sc=document.getElementById('simC');
+  const sctx=sc.getContext('2d'); sctx.clearRect(0,0,sc.width,sc.height);
+  q.sf(sctx,sc.width,sc.height);
+
+  // Setup test canvas
+  setupCanvas(q);
+}
+
+/* ================================================================
+   TIMER
+================================================================ */
+function startTimer(s){
+  secLeft=s;secTotal=s;updTimer();
+  timerInt=setInterval(()=>{secLeft--;updTimer();if(secLeft<=0){clearInterval(timerInt);onTimeout();}},1000);
+}
+function updTimer(){
+  const m=Math.floor(secLeft/60),s=secLeft%60;
+  const tv=document.getElementById('tval');if(tv)tv.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  const pct=secLeft/secTotal*100;
+  const f=document.getElementById('tfill');if(f){f.style.width=pct+'%';f.className='tfill'+(pct<25?' rd':'');}
+  const d=document.getElementById('tdisp');if(d)d.className='tdisp'+(pct<25?' rd':'');
+}
+function onTimeout(){
+  if(!answered){
+    answered=true; ans[qIdx]=false; updProg();
+    // Draw correct answer then move on
+    drawCorrect();
+    setFb('❌ انتهى الوقت! الإجابة الصحيحة مرسومة بالأخضر','err');
+    document.getElementById('subBtn').style.display='none';
+    document.getElementById('nxtBtn').style.display=''; document.getElementById('nxtBtn').textContent='السؤال التالي ◀';
+  }
+}
+
+/* ================================================================
+   CANVAS SETUP & DRAWING
+================================================================ */
+/* عنصر الرسم الحالي — نفس أسلوب الرسم (سحب مستمر بالماوس) لكل الأسئلة دون استثناء.
+   الاستماع للحركة والرفع على مستوى النافذة (وليس فقط على الكانفاس) يمنع انقطاع/اختفاء
+   الرسم إذا خرج المؤشر قليلاً عن حدود الكانفاس أثناء رسم شكل كبير قريب من الحواف. */
+let curCanvas=null, curCtx=null;
+
+function _pos(e){
+  const r=curCanvas.getBoundingClientRect(), src=e.touches?e.touches[0]:e;
+  let x=(src.clientX-r.left)*(curCanvas.width/r.width);
+  let y=(src.clientY-r.top)*(curCanvas.height/r.height);
+  x=Math.max(0,Math.min(curCanvas.width,x));
+  y=Math.max(0,Math.min(curCanvas.height,y));
+  return{x,y};
+}
+function _redrawCur(){
+  if(!curCtx||!curCanvas)return;
+  const q=Q[qIdx];
+  curCtx.clearRect(0,0,curCanvas.width,curCanvas.height);
+  q.cf(curCtx,curCanvas.width,curCanvas.height);
+  if(path.length>1){
+    curCtx.beginPath();curCtx.moveTo(path[0].x,path[0].y);
+    path.forEach(p=>curCtx.lineTo(p.x,p.y));
+    curCtx.strokeStyle='#dc2626';curCtx.lineWidth=2.8;
+    curCtx.lineJoin='round';curCtx.lineCap='round';curCtx.stroke();
+  }
+}
+function _drawStart(e){
+  if(answered||!curCanvas)return;
+  if(e.type==='touchstart')e.preventDefault();
+  drawing=true;path=[];path.push(_pos(e));
+}
+function _drawMove(e){
+  if(!drawing||answered||!curCanvas)return;
+  if(e.type==='touchmove')e.preventDefault();
+  path.push(_pos(e));_redrawCur();
+}
+function _drawEnd(){ drawing=false; }
+
+/* تُسجَّل مرة واحدة فقط عند تحميل الصفحة */
+window.addEventListener('mousemove',_drawMove);
+window.addEventListener('mouseup',_drawEnd);
+window.addEventListener('touchmove',_drawMove,{passive:false});
+window.addEventListener('touchend',_drawEnd);
+
+function setupCanvas(q){
+  const old=document.getElementById('tstC');
+  const nc=old.cloneNode(true); old.parentNode.replaceChild(nc,old);
+  curCanvas=nc; curCtx=nc.getContext('2d');
+  // Draw complex shape
+  q.cf(curCtx,nc.width,nc.height);
+  path=[];
+
+  nc.addEventListener('mousedown',_drawStart);
+  nc.addEventListener('touchstart',_drawStart,{passive:false});
+}
+
+function clearDraw(){
+  if(answered)return; path=[];
+  const c=document.getElementById('tstC'),ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height); Q[qIdx].cf(ctx,c.width,c.height);
+  setFb('','');
+}
+
+/* ================================================================
+   SUBMIT & EVALUATE
+================================================================ */
+function submitAns(){
+  if(answered)return;
+  if(path.length<10){setFb('⚠️ ارسم أولاً حدود الشكل البسيط داخل الشكل المعقد','err');return;}
+  answered=true;
+
+  const q=Q[qIdx];
+  const c=document.getElementById('tstC');
+  const W=c.width,H=c.height;
+  const ubb=bbox(path);
+  const abb=bbox(q.ans.map(p=>({x:p.x*W,y:p.y*H})));
+  const iou=iouCalc(ubb,abb);
+  const uw=ubb.maxX-ubb.minX,uh=ubb.maxY-ubb.minY;
+  const aw=abb.maxX-abb.minX,ah=abb.maxY-abb.minY;
+  const ss=Math.min(uw/Math.max(aw,1),aw/Math.max(uw,1))*Math.min(uh/Math.max(ah,1),ah/Math.max(uh,1));
+  // Center proximity check: user center vs answer center
+  const ucx=(ubb.minX+ubb.maxX)/2, ucy=(ubb.minY+ubb.maxY)/2;
+  const acx=(abb.minX+abb.maxX)/2, acy=(abb.minY+abb.maxY)/2;
+  const maxDim=Math.max(aw,ah,1);
+  const centerOk=Math.hypot(ucx-acx,ucy-acy)/maxDim < 0.5;
+  // عتبات مقبولة: IoU>0.5، تقارب الحجم>0.4، تقارب المركز — لتقليل الرفض الخاطئ للإجابات الصحيحة
+  const ok = iou>0.5 && ss>0.4 && centerOk;
+
+  ans[qIdx]=ok; updProg();
+
+  if(ok){
+    setFb('✅ إجابة صحيحة! أحسنت 🎉','ok');
+    // Draw correct answer in GREEN over user drawing to confirm
+    setTimeout(()=>drawCorrectOverlay(),400);
+  } else {
+    // Wrong: fade user drawing, draw correct answer
+    setFb('❌ إجابة خاطئة! ❌  — شاهد الإجابة الصحيحة المرسومة بالأخضر أدناه','err');
+    drawCorrect();
+  }
+
+  document.getElementById('subBtn').style.display='none';
+  document.getElementById('nxtBtn').style.display=''; document.getElementById('nxtBtn').textContent='السؤال التالي ◀';
+}
+
+/* Draw correct answer (green dashed) on top of complex shape — used for WRONG answers */
+function drawCorrect(){
+  const q=Q[qIdx];
+  const c=document.getElementById('tstC'),ctx=c.getContext('2d'),W=c.width,H=c.height;
+  // Redraw complex shape fresh
+  ctx.clearRect(0,0,W,H);
+  q.cf(ctx,W,H);
+  // Show user path faded
+  if(path.length>1){
+    ctx.beginPath();ctx.moveTo(path[0].x,path[0].y);
+    path.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle='rgba(156,163,175,.4)';ctx.lineWidth=2;
+    ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  }
+  // Draw correct outline — solid green, thicker
+  _drawAnswerPolygon(ctx,q.ans,W,H,'#16a34a',3.5,'[7,4]',true);
+}
+
+/* Draw correct answer OVER existing canvas — used for CORRECT answers (just to show the polygon) */
+function drawCorrectOverlay(){
+  const q=Q[qIdx];
+  const c=document.getElementById('tstC'),ctx=c.getContext('2d'),W=c.width,H=c.height;
+  _drawAnswerPolygon(ctx,q.ans,W,H,'#16a34a',3,null,false);
+}
+
+function _drawAnswerPolygon(ctx,pts,W,H,color,lw,dash,fill){
+  ctx.save();
+  ctx.strokeStyle=color;
+  ctx.lineWidth=lw;
+  ctx.lineJoin='round';
+  if(dash){ctx.setLineDash(JSON.parse(dash));}
+  if(fill){ctx.fillStyle='rgba(22,163,74,0.08)';}
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x*W,pts[0].y*H);
+  pts.forEach(p=>ctx.lineTo(p.x*W,p.y*H));
+  ctx.closePath();
+  if(fill)ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function setFb(msg,cls){
+  const el=document.getElementById('fbEl');
+  el.textContent=msg;
+  el.className='fb'+(cls?' '+cls:'');
+}
+
+/* ================================================================
+   BBOX + IOU helpers
+================================================================ */
+function bbox(pts){
+  let mnX=Infinity,mnY=Infinity,mxX=-Infinity,mxY=-Infinity;
+  pts.forEach(p=>{mnX=Math.min(mnX,p.x);mnY=Math.min(mnY,p.y);mxX=Math.max(mxX,p.x);mxY=Math.max(mxY,p.y);});
+  return{minX:mnX,minY:mnY,maxX:mxX,maxY:mxY};
+}
+function iouCalc(a,b){
+  const ix=Math.max(0,Math.min(a.maxX,b.maxX)-Math.max(a.minX,b.minX));
+  const iy=Math.max(0,Math.min(a.maxY,b.maxY)-Math.max(a.minY,b.minY));
+  const inter=ix*iy;
+  const aA=(a.maxX-a.minX)*(a.maxY-a.minY);
+  const bA=(b.maxX-b.minX)*(b.maxY-b.minY);
+  const u=aA+bA-inter; return u>0?inter/u:0;
+}
+
+/* ================================================================
+   NEXT QUESTION + SECTION BREAK
+================================================================ */
+function nextQ(){
+  const nxt=qIdx+1;
+  if(nxt>=Q.length){showResults();return;}
+  const cs=Q[qIdx].sec,ns=Q[nxt].sec;
+  if(ns!==cs){
+    clearInterval(timerInt);
+    document.getElementById('tstEl').style.display='none';
+    const sb=document.getElementById('sbkEl'); sb.classList.add('on');
+    pendingNext=nxt;
+    document.getElementById('sbkIco').textContent=ns===2?'⏭️':'🏁';
+    document.getElementById('sbkTitle').textContent=ns===2?'انتهى القسم الأول (التدريب)':'انتهى القسم الثاني';
+    document.getElementById('sbkMsg').textContent=ns===2
+      ?'أحسنت! الآن سيبدأ القسم الثاني — ٩ أشكال / ٥ دقائق. استعد!'
+      :'أحسنت! الآن سيبدأ القسم الثالث والأخير — ٩ أشكال / ٥ دقائق. استعد!';
+  } else {
+    loadQ(nxt);
+  }
+}
+
+function continueSection(){
+  document.getElementById('sbkEl').classList.remove('on');
+  document.getElementById('tstEl').style.display='flex';
+  loadQ(pendingNext);
+}
+
+/* ================================================================
+   RESULTS
+   ─────────────────────────────────────────────────────────────
+   نظام الدرجات (بناءً على القسمين 2 و3 — إجمالي 18 سؤال):
+     مستقل عن المجال (Field Independent) : 0 < الدرجة < 18   (أي 9–17)
+     معتمد على المجال (Field Dependent)  : 0 < الدرجة < 9    (أي 1–8)
+
+   نمط الدعم (ثابت / مرن) يُحدَّد تلقائيًا بحيث يتساوى العدد بين
+   المجموعتين داخل كل تصنيف (معتمد يتوزع بالتساوي بين ثابت/مرن،
+   ومستقل كذلك بشكل منفصل) — عبر عدّاد مشترك على Firebase Realtime
+   Database (بمعاملة ذرّية transaction تمنع تضارب العدّ حتى لو
+   طالبان أنهيا الاختبار في نفس اللحظة من جهازين مختلفين)، يعمل من
+   أي جهاز (معمل مشترك أو جهاز شخصي)، مع نسخة احتياطية محلية
+   (بالتناوب على نفس الجهاز) لو تعذّر الاتصال بالإنترنت. لا يظهر
+   للطالب أي اختيار — يتم تحديد البيئة تلقائيًا.
+
+   ══ لتغيير روابط البيئات: عدّل الكائن URLS أدناه فقط ══
+   ─────────────────────────────────────────────────────────────
+*/
+
+/* ★ عدّل الروابط هنا — كل مفتاح يقابل توليفة (تصنيف + نمط دعم) ★ */
+const URLS = {
+  btnA: 'https://worledtecnology-spec.github.io/Fixed-Support--g1/',        // معتمد + دعم ثابت
+  btnB: 'https://worledtecnology-spec.github.io/Fixed-Support--g2/',        // مستقل + دعم ثابت
+  btnC: 'https://worledtecnology-spec.github.io/Flexible-Support---g3/',    // معتمد + دعم مرن
+  btnD: 'https://worledtecnology-spec.github.io/Flexible-Support---g4/',    // مستقل + دعم مرن
+};
+
+function goTo(btn){
+  const url = URLS[btn];
+  if(url) window.location.href = url;
+}
+
+function goToAssignedEnv(){
+  if(window._assignedBtn) goTo(window._assignedBtn);
+}
+
+/* ── تحديد نمط الدعم بالتساوي (ثابت/مرن) عبر Firebase (معاملة ذرّية)، مع نسخة احتياطية محلية ── */
+async function getBalancedSupportType(bcls){
+  const path = bcls === 'dep' ? 'counters/dep' : 'counters/ind';
+  if(_fbReady){
+    try{
+      const ref = firebase.database().ref(path);
+      const result = await ref.transaction(current => (current || 0) + 1);
+      if(result.committed && typeof result.snapshot.val() === 'number'){
+        return (result.snapshot.val() % 2 === 1) ? 'fixed' : 'flex';
+      }
+      throw new Error('transaction not committed');
+    }catch(e){
+      /* يكمل تلقائيًا على النسخة الاحتياطية بالأسفل */
+    }
+  }
+  /* نسخة احتياطية: تناوب محلي على نفس الجهاز لو تعذّر الاتصال بـ Firebase */
+  const localKey = 'localSupportCounter_' + bcls;
+  const local = (parseInt(localStorage.getItem(localKey) || '0', 10)) + 1;
+  localStorage.setItem(localKey, local);
+  return (local % 2 === 1) ? 'fixed' : 'flex';
+}
+
+async function showResults(){
+  clearInterval(timerInt);
+  document.getElementById('tstEl').style.display='none';
+  document.getElementById('sbkEl').classList.remove('on');
+  document.getElementById('resEl').classList.add('on');
+
+  /* ── حساب الدرجة (القسم 2 و3 فقط) ── */
+  const scored = ans.filter((_,i) => Q[i].sec !== 1);
+  const correct = scored.filter(a => a === true).length;
+  const total   = scored.length;   // = 18
+
+  document.getElementById('rScr').textContent =
+    `الدرجة: ${correct} من ${total}`;
+
+  /* ── التصنيف بالمدى المطلوب (> 0 و < N) ── */
+  const IND_MAX = 18;   // مستقل: 0 < درجة < 18
+  const DEP_MAX = 9;    // معتمد: 0 < درجة < 9
+
+  let icon, badge, bcls, det, scoreMsg, scoreInfoCls;
+  let needsRouting = false;
+
+  if (correct > 0 && correct < DEP_MAX) {
+    /* ─── معتمد على المجال ─── */
+    icon='📚'; badge='معتمد على المجال (Field Dependent)'; bcls='dep';
+    det='تميل إلى النمط المعتمد على المجال. يمكنك تحسين مهارتك من خلال الأنشطة التدريبية المخصصة في بيئة التعلم.';
+    scoreMsg=`درجتك ${correct} تقع في المدى (0 < درجة < 9) → نمط معتمد على المجال`;
+    scoreInfoCls='dep-info';
+    needsRouting = true;
+
+  } else if (correct >= DEP_MAX && correct < IND_MAX) {
+    /* ─── مستقل عن المجال ─── */
+    icon='🏆'; badge='مستقل عن المجال (Field Independent)'; bcls='ind';
+    det='لديك قدرة عالية على تمييز الأشكال المتضمنة. تنتمي إلى النمط المستقل وتتميز في التحليل والتفكير المجرد.';
+    scoreMsg=`درجتك ${correct} تقع في المدى (0 < درجة < 18) → نمط مستقل عن المجال`;
+    scoreInfoCls='';
+    needsRouting = true;
+
+  } else if (correct === 0) {
+    /* ─── درجة صفر: إعادة الاختبار ─── */
+    icon='❌'; badge='درجتك خارج المدى المحدد'; bcls='';
+    det='حصلت على صفر درجة. لا يمكن تحديد أسلوب التعلم المناسب. يُرجى إعادة الاختبار والتركيز جيداً.';
+    scoreMsg=`درجتك ${correct} — يقع خارج المدى المحدد، يجب إعادة الاختبار`;
+    scoreInfoCls='dep-info';
+
+  } else {
+    /* ─── حالة حافة: 18 ─── */
+    icon='⭐'; badge='راجع الاختبار مع المشرف'; bcls='';
+    det='درجتك تقع خارج المديين المحددين. يُرجى مراجعة المشرف لتحديد بيئة التعلم المناسبة لك.';
+    scoreMsg=`درجتك ${correct} — يُرجى مراجعة المشرف`;
+    scoreInfoCls='';
+  }
+
+  /* ── تحديث واجهة النتيجة ── */
+  document.getElementById('rIco').textContent  = icon;
+  document.getElementById('rBdg').textContent  = badge;
+  document.getElementById('rBdg').className    = 'rbadge ' + bcls;
+  document.getElementById('rDet').textContent  = det;
+
+  const si = document.getElementById('scoreInfo');
+  si.textContent  = scoreMsg;
+  si.className    = 'score-info' + (scoreInfoCls ? ' '+scoreInfoCls : '');
+
+  /* ── التوجيه التلقائي لبيئة واحدة، بنمط دعم متوازن العدد ── */
+  const retryBox      = document.getElementById('retryBox');
+  const resBtns        = document.getElementById('resBtns');
+  const autoRouteMsg  = document.getElementById('autoRouteMsg');
+  const goEnvBtn       = document.getElementById('goEnvBtn');
+
+  window._assignedBtn = null;
+
+  if (correct === 0) {
+    retryBox.style.display = 'block';
+    resBtns.style.display  = 'none';
+
+  } else if (needsRouting) {
+    retryBox.style.display = 'none';
+    resBtns.style.display  = 'block';
+    goEnvBtn.style.display = 'none';
+    autoRouteMsg.textContent = '⏳ جارِ تحديد بيئتك المناسبة...';
+
+    const supportType = await getBalancedSupportType(bcls);   // 'fixed' | 'flex'
+    const supportLabel = supportType === 'fixed' ? 'نمط الدعم الثابت' : 'نمط الدعم المرن';
+    const assignedBtn =
+      bcls === 'dep' ? (supportType === 'fixed' ? 'btnA' : 'btnC')
+                      : (supportType === 'fixed' ? 'btnB' : 'btnD');
+
+    window._assignedBtn = assignedBtn;
+    document.getElementById('rBdg').textContent = badge + ' — ' + supportLabel;
+    autoRouteMsg.textContent = `🎯 بيئتك المناسبة: ${supportLabel}. سيتم نقلك تلقائيًا خلال لحظات...`;
+    goEnvBtn.style.display = 'block';
+    setTimeout(goToAssignedEnv, 4000);
+
+  } else {
+    /* حالة الحافة (18): لا يوجد تصنيف مؤكد — مراجعة المشرف يدويًا */
+    retryBox.style.display = 'none';
+    resBtns.style.display  = 'block';
+    autoRouteMsg.textContent = '⭐ يُرجى مراجعة المشرف لتحديد البيئة المناسبة — لا يمكن التوجيه التلقائي في هذه الحالة.';
+    goEnvBtn.style.display = 'none';
+  }
+
+  window._lastResult = { correct, total, badge, bcls };
+}
+
+/* ================================================================
+   RESTART TEST
+================================================================ */
+function restartTest(){
+  /* إعادة تعيين المتغيرات */
+  qIdx       = 0;
+  ans        = [];
+  pendingNext= -1;
+  clearInterval(timerInt);
+
+  /* إعادة واجهة النتيجة */
+  document.getElementById('resEl').classList.remove('on');
+  document.getElementById('retryBox').style.display = 'none';
+  document.getElementById('resBtns').style.display  = 'none';
+
+  /* إظهار منطقة الاختبار مباشرةً */
+  document.getElementById('waitEl').style.display = 'none';
+  document.getElementById('sbkEl').classList.remove('on');
+  document.getElementById('tstEl').style.display  = 'flex';
+
+  loadQ(0);
+}
+</script>
+</body>
+</html>
