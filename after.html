@@ -131,21 +131,32 @@ body { display: flex; flex-direction: column; height: 100vh; }
     line-height: 1.7; flex-shrink: 0;
 }
 .options-container {
-    display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1;
+    flex: 1; min-height: 0; max-height: 170px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: clamp(8px, 1.6vh, 14px);
+    overflow: hidden;
 }
 .option-btn {
-    display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
-    border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer;
-    transition: all 0.2s ease; background: #fafafa; text-align: right;
-    font-family: 'Cairo', sans-serif; font-size: 14px; color: var(--text-main);
-    font-weight: 600; line-height: 1.5; width: 100%; box-sizing: border-box;
+    display: flex; align-items: center; gap: 12px;
+    padding: clamp(4px, 0.8vh, 10px) clamp(10px, 1.4vw, 18px);
+    border: 2px solid #e5e7eb; border-radius: 14px; cursor: pointer;
+    transition: border-color .2s, background-color .2s, color .2s, transform .2s, box-shadow .2s; background: #fafafa; text-align: right;
+    font-family: 'Cairo', sans-serif;
+    font-size: calc(clamp(13px, 2.3vh, 18px) * var(--fit, 1));
+    color: var(--text-main);
+    font-weight: 600; line-height: 1.5; width: 100%; height: 100%;
+    box-sizing: border-box; min-height: 0; overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
-.option-btn:hover { border-color: var(--primary-light); background: #f0fdf4; transform: translateX(-2px); }
-.option-btn.selected { border-color: var(--primary); background: #ecfdf5; color: var(--primary); }
+.option-btn > span:last-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.option-btn:hover { border-color: var(--primary-light); background: #f0fdf4; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(27,107,90,0.15); }
+.option-btn.selected { border-color: var(--primary); background: #ecfdf5; color: var(--primary); box-shadow: 0 6px 16px rgba(27,107,90,0.22); }
 .option-letter {
-    width: 28px; height: 28px; border-radius: 50%; background: #e5e7eb;
+    width: clamp(26px, 4.4vh, 38px); height: clamp(26px, 4.4vh, 38px);
+    border-radius: 50%; background: #e5e7eb;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; flex-shrink: 0; transition: all 0.2s;
+    font-size: calc(clamp(12px, 2vh, 16px) * var(--fit, 1)); font-weight: 700; flex-shrink: 0; transition: background-color .2s, color .2s;
 }
 .option-btn.selected .option-letter { background: var(--primary); color: #fff; }
 
@@ -154,7 +165,7 @@ body { display: flex; flex-direction: column; height: 100vh; }
 .tf-btn {
     flex: 1; padding: 16px; border: 2px solid #e5e7eb; border-radius: 14px;
     cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px;
-    font-weight: 700; text-align: center; transition: all 0.25s; background: #fafafa;
+    font-weight: 700; text-align: center; transition: background-color .25s, border-color .25s, transform .25s, box-shadow .25s; background: #fafafa;
 }
 .tf-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .tf-btn.true-btn { color: #059669; border-color: #6ee7b7; }
@@ -458,21 +469,54 @@ body { display: flex; flex-direction: column; height: 100vh; }
   .winstr-head .welcome-title{font-size:16px;}
 }
 
-/* ===== اختبار بدون سكرول: بدائل صغيرة على جانبين ===== */
-.quiz-panel{padding:8px 12px;gap:6px;}
-.quiz-header{padding:6px 14px;}
-.quiz-progress-row{padding:5px 14px;}
-#quizArea{gap:8px!important;}
-.question-card{padding:12px 18px;gap:8px;}
-.question-text{font-size:15px;line-height:1.55;}
-.options-container{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;overflow-y:auto;}
-.option-btn{padding:8px 10px;gap:8px;font-size:13px;line-height:1.45;align-items:center;}
-.option-btn:hover{transform:none;}
-.option-letter{width:24px;height:24px;font-size:11px;}
-.tf-container{grid-column:1/-1;gap:10px;}
-.tf-btn{padding:10px;font-size:15px;}
-.nav-btn{padding:7px 20px;font-size:13px;}
-@media (max-width:640px){ .options-container{grid-template-columns:1fr;} }
+
+/* ===== ضبط العرض بدون سكرول نهائيًا ===== */
+html, body { height: 100dvh; }
+body { height: 100dvh; }
+.quiz-panel { min-height: 0; }
+#quizArea { min-height: 0; }
+.question-card {
+    min-height: 0; justify-content: center;
+    padding: clamp(10px, 2.4vh, 26px) clamp(14px, 2.4vw, 30px);
+    gap: clamp(8px, 1.8vh, 16px);
+}
+.question-text { font-size: calc(clamp(15px, 2.7vh, 21px) * var(--fit, 1)); }
+.nav-btn { font-size: 13px; }
+.options-container.tf-mode { display: flex; }
+.options-container.tf-mode .tf-container { width: 100%; height: 100%; max-height: 160px; align-self: center; }
+.tf-btn { display: flex; align-items: center; justify-content: center; font-size: calc(clamp(16px, 2.8vh, 22px) * var(--fit, 1)); padding: 8px; }
+@media (max-width: 600px) {
+    .options-container { max-height: 240px; }
+}
+@media (max-height: 760px) {
+    .header { padding: 4px 16px; }
+    .header-title { font-size: 15px; }
+    .nav { padding: 4px 12px; gap: 6px; }
+    .nav a { padding: 3px 10px; font-size: 12px; }
+    .quiz-panel { padding: 8px; gap: 6px; }
+    .quiz-header { padding: 5px 12px; }
+    .quiz-progress-row { padding: 5px 14px; }
+    .nav-btn { padding: 6px 18px; }
+}
+@media (max-height: 640px) {
+    .quiz-progress-row { display: none; }
+}
+@media (max-height: 560px) {
+    .header, .nav { display: none; }
+    .quiz-progress-row { display: none; }
+}
+
+/* ===== السؤال والاختيارات لأعلى + أمان إضافي ضد السكرول ===== */
+html, body { max-height: 100dvh; overflow: hidden; overscroll-behavior: none; }
+.question-card { justify-content: flex-start; padding-top: clamp(8px, 1.6vh, 18px); }
+.question-num { align-self: flex-start; }
+.question-text { overflow-wrap: anywhere; }
+body.c1 .quiz-progress-row { display: none; }
+body.c2 .quiz-progress-row, body.c2 .header { display: none; }
+body.c3 .quiz-progress-row, body.c3 .header, body.c3 .nav { display: none; }
+body.c2 .quiz-panel, body.c3 .quiz-panel { padding: 6px; gap: 4px; }
+body.c2 .quiz-header, body.c3 .quiz-header { padding: 4px 10px; }
+body.c3 .question-num { display: none; }
 </style>
 </head>
 <body>
@@ -577,7 +621,7 @@ body { display: flex; flex-direction: column; height: 100vh; }
         </div>
 
         <!-- كارت السؤال -->
-        <div id="quizArea" style="display:flex; flex-direction:column; gap:12px; flex:1; overflow:hidden;">
+        <div id="quizArea" style="display:flex; flex-direction:column; gap:10px; flex:1; min-height:0; overflow:hidden;">
             <div class="question-card">
                 <div class="question-num" id="qNum">سؤال 1</div>
                 <div class="question-text" id="qText"></div>
@@ -809,7 +853,13 @@ function startExam() {
   try { fromSS = sessionStorage.getItem('pendingPostStudent') || ''; } catch(e){}
   var inputEl   = document.getElementById('studentNameInput');
   var fromInput = inputEl ? inputEl.value.trim() : '';
-  studentName = fromURL || fromSS || fromInput || 'مشرف / محكّم';
+  studentName   = fromURL || fromSS || fromInput;
+
+  if (!studentName) {
+    var err = document.getElementById('nameError');
+    if (err) err.classList.add('show');
+    return;
+  }
 
   examStarted = true; document.body.classList.add("exam-active");
   var overlay = document.getElementById('welcomeOverlay');
@@ -858,6 +908,7 @@ function renderQuestion() {
 
   var container = document.getElementById('optionsContainer');
   container.innerHTML = '';
+  container.classList.toggle('tf-mode', q.type !== 'mcq');
 
   if (q.type === 'mcq') {
     var letters = ['أ','ب','ج','د'];
@@ -893,7 +944,54 @@ function renderQuestion() {
     nextBtn.className = 'nav-btn btn-next';
   }
   updateProgress();
+  fitQuestion();
 }
+
+// ===== ضبط تلقائي صارم: لا سكرول على أي جهاز =====
+function _qOverflow() {
+  var card = document.querySelector('.question-card');
+  var opts = document.getElementById('optionsContainer');
+  var qp   = document.querySelector('.quiz-panel');
+  var area = document.getElementById('quizArea');
+  if (card.scrollHeight > card.clientHeight + 1 || card.scrollWidth > card.clientWidth + 1) return true;
+  if (opts.scrollHeight > opts.clientHeight + 1 || opts.scrollWidth > opts.clientWidth + 1) return true;
+  if (qp && qp.scrollHeight > qp.clientHeight + 1) return true;
+  if (area && area.scrollHeight > area.clientHeight + 1) return true;
+  var de = document.documentElement;
+  if (de.scrollHeight > window.innerHeight + 1 || de.scrollWidth > window.innerWidth + 1) return true;
+  var btns = opts.querySelectorAll('.option-btn, .tf-btn');
+  for (var i = 0; i < btns.length; i++) {
+    if (btns[i].scrollHeight > btns[i].clientHeight + 1 || btns[i].scrollWidth > btns[i].clientWidth + 1) return true;
+  }
+  return false;
+}
+function fitQuestion() {
+  var card = document.querySelector('.question-card');
+  if (!card || card.clientHeight === 0) return;
+  var levels = ['', 'c1', 'c2', 'c3'];
+  for (var L = 0; L < levels.length; L++) {
+    document.body.classList.remove('c1', 'c2', 'c3');
+    if (levels[L]) document.body.classList.add(levels[L]);
+    var fit = 1;
+    card.style.setProperty('--fit', fit);
+    while (_qOverflow() && fit > 0.35) {
+      fit = Math.round((fit - 0.05) * 100) / 100;
+      card.style.setProperty('--fit', fit);
+    }
+    if (!_qOverflow()) return;
+  }
+}
+var _fitRaf = null;
+function _scheduleFit() {
+  if (_fitRaf) cancelAnimationFrame(_fitRaf);
+  _fitRaf = requestAnimationFrame(function(){ _fitRaf = null; fitQuestion(); });
+}
+window.addEventListener('resize', _scheduleFit);
+window.addEventListener('orientationchange', function(){ setTimeout(_scheduleFit, 150); });
+if (window.visualViewport) window.visualViewport.addEventListener('resize', _scheduleFit);
+if (window.ResizeObserver) { try { new ResizeObserver(_scheduleFit).observe(document.body); } catch(e){} }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(_scheduleFit);
+window.addEventListener('load', _scheduleFit);
 
 function selectMCQ(i) { answers[current] = i; renderQuestion(); }
 function selectTF(val) { answers[current] = val; renderQuestion(); }
@@ -960,18 +1058,6 @@ function goToLearningStyle() {
 
 // ===== تشغيل تلقائي عند تحميل الصفحة =====
 document.addEventListener('DOMContentLoaded', function() {
-  var style = document.createElement('style');
-  style.textContent = 'body.exam-active .nav a.nav-exam-locked{opacity:.45;cursor:not-allowed!important;pointer-events:auto!important;}.body.exam-active .nav a.nav-exam-locked:hover{background:transparent!important;color:#e0f2f1!important;transform:none!important;box-shadow:none!important;border-color:rgba(167,243,208,0.5)!important;}.nav a.nav-exam-locked::after{content:"🔒";font-size:10px;margin-right:3px;}';
-  document.head.appendChild(style);
-
-  document.querySelector('.nav').addEventListener('click', function(e) {
-    var link = e.target.closest('a');
-    if (link && link.classList.contains('nav-exam-locked') && examStarted) {
-      e.preventDefault();
-      showExamToast('لا يمكنك مغادرة الصفحة أثناء الاختبار');
-    }
-  });
-
   var urlParams = new URLSearchParams(window.location.search);
   var fromURL   = urlParams.get('s') || '';
   var fromSS    = '';
@@ -996,9 +1082,6 @@ function showExamToast(msg) {
   toast._t = setTimeout(function(){ toast.style.display = 'none'; }, 3000);
 }
 </script>
-
-
-
 <script>
 // ===== التنقل بين شاشة التعليمات وشاشة الاسم =====
 function knownStudentName() {
@@ -1007,15 +1090,21 @@ function knownStudentName() {
   try { fromSS = sessionStorage.getItem('pendingPostStudent') || ''; } catch(e) {}
   return fromURL || fromSS;
 }
-function afterInstructions() { startExam(); }
+function afterInstructions() {
+  if (knownStudentName()) { startExam(); return; }
+  document.getElementById('instrScreen').style.display = 'none';
+  document.getElementById('entryScreen').style.display = 'flex';
+  var inp = document.getElementById('studentNameInput'); if (inp) inp.focus();
+}
 function backToInstructions() {
   document.getElementById('entryScreen').style.display = 'none';
   document.getElementById('instrScreen').style.display = 'flex';
 }
 document.addEventListener('DOMContentLoaded', function() {
   var b = document.getElementById('instrNextBtn');
-  if (b) b.textContent = '🚀 ابدأ الاختبار الآن';
+  if (b && knownStudentName()) b.textContent = '🚀 ابدأ الاختبار الآن';
 });
 </script>
+
 </body>
 </html>
