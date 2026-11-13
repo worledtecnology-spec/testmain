@@ -25,7 +25,9 @@
     document.querySelectorAll('.g-links a, .ins-link').forEach(function(a){
       a.classList.toggle('active', a.getAttribute('href') === '#' + target.id);
     });
-    var m = document.getElementById('gMain'); if (m && id) m.scrollIntoView({block:'start', behavior:'smooth'});
+    /* الرجوع لبداية القسم داخل إطار المحتوى فقط (بدون تحريك الصفحة كلها) */
+    var m = document.getElementById('gMain');
+    if (m) { if (m.scrollHeight > m.clientHeight) m.scrollTop = 0; else if (id && window.innerWidth <= 900) m.scrollIntoView({block:'start'}); }
   }
   window.addEventListener('hashchange', show);
   show();

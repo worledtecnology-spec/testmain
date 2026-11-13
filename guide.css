@@ -61,3 +61,15 @@ body{display:flex;flex-direction:column;min-height:100vh;}
 .ins-link.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent;}
 .ins-link.active small{color:#ccfbf1;}
 @media (max-width:900px){.g-wrap{grid-template-columns:1fr;}.g-side{position:static;}.cards2,.cards4,.ins-links{grid-template-columns:1fr;}.header{padding:52px 12px 10px;}.brand-logos{bottom:auto;height:48px;}}
+
+/* ── تمرير داخلي: الشعارات والتبويبات ثابتة، والقائمة الجانبية والمحتوى يتحرك كل منهما داخل إطاره ── */
+@media (min-width:901px){
+  html,body{height:100%;}
+  body{height:100vh;overflow:hidden;}
+  .header,.nav{flex-shrink:0;}
+  .g-wrap{flex:1 1 auto;min-height:0;overflow:hidden;align-items:stretch;}
+  .g-side{position:static;align-self:stretch;display:flex;flex-direction:column;min-height:0;}
+  .g-side-hdr{flex-shrink:0;}
+  .g-links{flex:1;min-height:0;overflow-y:auto;}
+  .g-main{min-height:0;overflow-y:auto;scroll-behavior:smooth;}
+}
