@@ -1,0 +1,63 @@
+rules_version = '2';
+// قواعد حماية قاعدة بيانات بيئة التعلم المدمج (Cloud Firestore)
+// الصقها في: Firestore Database ← Rules ← ثم Publish
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()      { return request.auth != null; }
+    function isResearcher()  { return signedIn() && exists(/databases/$(database)/documents/researchers/$(request.auth.uid)); }
+    function isOwner(uid)    { return signedIn() && request.auth.uid == uid; }
+    function firstSetup()    { return signedIn()
+                                 && request.auth.token.email == 'salwa@gmail.com'
+                                 && !exists(/databases/$(database)/documents/config/app); }
+
+    // إعدادات البيئة (هل تم إنشاء حساب الباحثة؟)
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isResearcher() || firstSetup();
+    }
+
+    // حسابات الباحثين/المشرفين
+    match /researchers/{uid} {
+      allow read: if isResearcher() || isOwner(uid);
+      allow write: if isResearcher() || (isOwner(uid) && firstSetup());
+    }
+
+    // حسابات الطلاب: الباحثة تنشئ وتعدّل — الطالب يقرأ حسابه ويحدّث «آخر دخول» فقط
+    match /students/{uid} {
+      allow read: if isResearcher() || isOwner(uid);
+      allow write: if isResearcher();
+      allow update: if isOwner(uid)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']);
+    }
+
+    match /usernames/{name} {
+      allow read, write: if isResearcher();
+    }
+
+    // تقدّم الطالب ونتائجه وإجابات أنشطته: الطالب لنفسه فقط + الباحثة
+    match /progress/{uid} {
+      allow read, write: if isOwner(uid) || isResearcher();
+    }
+    match /results/{uid} {
+      allow read, write: if isOwner(uid) || isResearcher();
+      match /attempts/{attempt} {
+        allow read, write: if isOwner(uid) || isResearcher();
+      }
+    }
+    match /activities/{uid} {
+      allow read, write: if isOwner(uid) || isResearcher();
+    }
+
+    // سجل النشاط: الطالب يضيف أحداثه فقط، والباحثة تقرأ الكل
+    match /logs/{id} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read, delete: if isResearcher();
+    }
+
+    // عدّاد التوزيع المتوازن لنمط الدعم
+    match /counters/{id} {
+      allow read, write: if signedIn();
+    }
+  }
+}

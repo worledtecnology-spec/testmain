@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script src="env.js" data-site="main"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الاختبار التحصيلي القبلي</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -530,7 +531,7 @@ body.c3 .question-num { display: none; }
 <div class="nav">
   <a href="index.html">🏠 الرئيسية</a>
   <a href="aims.html">🎯 أهداف البيئة</a>
-  <a href="guied.html">📚 دليل التعلم</a>
+  <a href="guied.html">📘 دليل المتعلم</a>
   <a href="mods.html">📖 المحتوى التعليمي</a>
   <a href="pretest.html" class="active">📝 التقويم</a>
   <a href="trian.html">🧩 اختبار أساليب التعلم</a>
@@ -568,8 +569,8 @@ body.c3 .question-num { display: none; }
             <li><span class="wi-icon">💯</span><span>درجة كل سؤال: <b>درجة واحدة</b> — الدرجة الكلية للاختبار: <b>160 درجة</b>.</span></li>
             <li><span class="wi-icon">🎯</span><span>الحد الأدنى لاجتياز الاختبار: <b>50%</b> (80 درجة فأكثر).</span></li>
             <hr>
-            <li><span class="wi-icon">🟢</span><span>في حال تحقيق الحد الأدنى: تنتقل تلقائيًا إلى صفحة التقويم لمتابعة باقي خطوات البيئة.</span></li>
-            <li><span class="wi-icon">🟠</span><span>في حال عدم تحقيق الحد الأدنى: يمكنك متابعة الدراسة، ثم أداء الاختبار البعدي لاحقًا بنفس الطريقة.</span></li>
+            <li><span class="wi-icon">🟢</span><span>إذا كانت درجتك 50% فأكثر: مستواك المبدئي جيد، وتتابع نفس المسار (اختبار أساليب التعلم ← المحتوى ← البعدي) لإتقان المهارات.</span></li>
+            <li><span class="wi-icon">🟠</span><span>إذا كانت درجتك أقل من 50%: هذا متوقع قبل الدراسة؛ تنتقل لاختبار أساليب التعلم ثم تدرس المحتوى التعليمي كاملًا.</span></li>
             <hr>
             <li><span class="wi-icon">⏱️</span><span>زمن الاختبار: <b>90 دقيقة</b> من لحظة الضغط على زر "ابدأ الاختبار".</span></li>
             <li><span class="wi-icon">⏰</span><span>عند انتهاء الوقت: يُسلَّم الاختبار تلقائيًا بالإجابات المسجلة حتى تلك اللحظة.</span></li>
@@ -661,8 +662,8 @@ body.c3 .question-num { display: none; }
             <div class="result-detail" id="resultDetail"></div>
             <div class="result-status" id="resultStatus" style="width:100%; border-radius:14px; padding:12px 16px; font-size:13px; font-weight:700; line-height:1.8;"></div>
             <div class="result-actions">
-                <a href="index.html" class="home-btn">🏠 العودة للصفحة الرئيسية</a>
-                <a href="pretest.html" class="home-btn" style="background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;margin-top:8px;">📝 العودة لصفحة التقويم</a>
+                <a href="trian.html" class="home-btn" id="goStylesBtn" style="background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;font-size:15px;">🧩 الخطوة التالية: اختبار أساليب التعلم ←</a>
+                <div style="font-size:11.5px;color:#6b7280;margin-top:6px;line-height:1.7;">بعد اختبار أساليب التعلم توجّهك البيئة تلقائيًا إلى نمط الدعم المناسب لك ويُفتح لك المحتوى التعليمي.</div>
             </div>
         </div>
     </div>
@@ -848,7 +849,7 @@ var examStarted   = false;
 // ===== بدء الاختبار =====
 function startExam() {
   var urlParams = new URLSearchParams(window.location.search);
-  var fromURL   = urlParams.get('s') || '';
+  var fromURL   = urlParams.get('s') || ((window.ENV && ENV.user()) ? ENV.user().name : '');
   var fromSS    = '';
   try { fromSS = sessionStorage.getItem('pendingPreStudent') || ''; } catch(e){}
   var inputEl   = document.getElementById('studentNameInput');
@@ -1031,12 +1032,12 @@ function submitExam() {
     statusEl.style.background = '#ecfdf5';
     statusEl.style.color = '#065f46';
     statusEl.style.border = '2px solid #6ee7b7';
-    statusEl.textContent = '🎉 تهانينا! لقد حققت الحد الأدنى للنجاح (' + PASS_PCT + '%). يمكنك الآن متابعة الدراسة والانتقال لصفحة التقويم لأداء الاختبار البعدي لاحقًا.';
+    statusEl.textContent = '🎉 مستواك المبدئي جيد (' + pct + '% — الحد ' + PASS_PCT + '%). ومع ذلك تابع: أدِّ اختبار أساليب التعلم ثم ادرس المحتوى التعليمي كاملًا لإتقان المهارات العملية، ثم الاختبار البعدي في النهاية.';
   } else {
     statusEl.style.background = '#fff7ed';
     statusEl.style.color = '#9a3412';
     statusEl.style.border = '2px solid #fdba74';
-    statusEl.textContent = '📚 لم تحقق الحد الأدنى (' + PASS_PCT + '%) في هذا الاختبار التشخيصي. لا داعي للقلق، تابع دراسة المحتوى التعليمي جيدًا استعدادًا للاختبار البعدي.';
+    statusEl.textContent = '📚 درجتك أقل من ' + PASS_PCT + '% — وهذا متوقع قبل الدراسة لأنه اختبار تشخيصي. خطوتك التالية: اختبار أساليب التعلم، ثم ادرس المحتوى التعليمي جيدًا استعدادًا للاختبار البعدي.';
   }
 
   // حفظ في localStorage لفتح البعدي
@@ -1045,6 +1046,18 @@ function submitExam() {
     var key  = studentName.trim().toLowerCase();
     if (list.indexOf(key) === -1) { list.push(key); localStorage.setItem('completedPreTest', JSON.stringify(list)); }
     localStorage.setItem('preTestCompleted', 'true');
+    localStorage.setItem('preTestScore', String(pct));
+    if (window.ENV) {
+      ENV.setProgress('preTestCompleted', true);
+      ENV.setProgress('preTestScore', pct);
+      ENV.track('pretest', { score: pct, correct: correct, wrong: wrong, unanswered: unanswered, total: questions.length });
+      ENV.saveResult('pre', { score: pct, correct: correct, wrong: wrong, unanswered: unanswered, total: questions.length,
+        durationSec: Math.max(0, 90 * 60 - (typeof timeLeft === 'number' ? timeLeft : 0)),
+        /* لكل سؤال بالترتيب: 1 = صحيحة، 0 = خاطئة، - = بدون إجابة (لتحليل المفردات) */
+        detail: questions.map(function(q, i){ return answers[i] === null || answers[i] === undefined ? '-' : (answers[i] === q.correct ? '1' : '0'); }).join(''),
+        answers: JSON.stringify(answers) });
+      ENV.rebuildNav();
+    }
     localStorage.setItem('preTestStudentName', studentName.trim());
     sessionStorage.removeItem('pendingPreStudent');
     sessionStorage.setItem('donePreStudent', studentName);
@@ -1057,6 +1070,20 @@ function submitExam() {
 
 // ===== تشغيل تلقائي عند تحميل الصفحة =====
 document.addEventListener('DOMContentLoaded', function() {
+  // CSS قفل الناف أثناء الاختبار
+  var style = document.createElement('style');
+  style.textContent = 'body.exam-active .nav a.nav-exam-locked{opacity:.45;cursor:not-allowed!important;pointer-events:auto!important;}.body.exam-active .nav a.nav-exam-locked:hover{background:transparent!important;color:#e0f2f1!important;transform:none!important;box-shadow:none!important;border-color:rgba(167,243,208,0.5)!important;}.nav a.nav-exam-locked::after{content:"🔒";font-size:10px;margin-right:3px;}';
+  document.head.appendChild(style);
+
+  // منع النقر على الروابط المقفولة
+  document.querySelector('.nav').addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (link && link.classList.contains('nav-exam-locked') && examStarted) {
+      e.preventDefault();
+      showExamToast('لا يمكنك مغادرة الصفحة أثناء الاختبار');
+    }
+  });
+
   // الاسم جاي من صفحة التقويم: نعبّئه فقط، ولا نبدأ الاختبار إلا بعد شاشة التعليمات
   var urlParams = new URLSearchParams(window.location.search);
   var fromURL   = urlParams.get('s') || '';
@@ -1082,9 +1109,13 @@ function showExamToast(msg) {
   toast._t = setTimeout(function(){ toast.style.display = 'none'; }, 3000);
 }
 </script>
+
+
 <script>
 // ===== التنقل بين شاشة التعليمات وشاشة الاسم =====
 function knownStudentName() {
+  var envU = (window.ENV && ENV.user()) || null;
+  if (envU) return envU.name;
   var fromURL = new URLSearchParams(window.location.search).get('s') || '';
   var fromSS = '';
   try { fromSS = sessionStorage.getItem('pendingPreStudent') || ''; } catch(e) {}
@@ -1106,5 +1137,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+/* لو الطالب أدّى القبلي من قبل (نسخة الطلاب): لا يُعاد، ويُوجَّه للخطوة التالية */
+document.addEventListener('DOMContentLoaded', function(){
+  if (!window.ENV || ENV.CONFIG.OPEN_MODE || !ENV.flag('preTestCompleted')) return;
+  var box = document.querySelector('#welcomeOverlay .welcome-box');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:30px 20px;">'
+    + '<div style="font-size:54px;">✅</div>'
+    + '<div style="font-size:19px;font-weight:800;color:#1b6b5a;margin:8px 0;">لقد أدّيت الاختبار التحصيلي القبلي من قبل</div>'
+    + '<div style="font-size:13px;color:#4b5563;margin-bottom:18px;">درجتك: <b>' + (localStorage.getItem('preTestScore') || '—') + '%</b> — لا يمكن إعادة الاختبار القبلي.</div>'
+    + '<a href="' + ENV.nextStepUrl() + '" style="display:inline-block;background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;text-decoration:none;font-weight:800;padding:12px 26px;border-radius:12px;">متابعة الخطوة التالية ←</a></div>';
+});
+</script>
 </body>
 </html>

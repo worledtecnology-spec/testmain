@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script src="env.js" data-site="main"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>اختبار الأشكال المتضمنة</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -207,14 +208,32 @@ body{display:flex;flex-direction:column;height:100vh}
 <nav class="nav">
   <a href="index.html">🏠 الرئيسية</a>
   <a href="aims.html">🎯 أهداف البيئة</a>
-  <a href="guied.html">📚 دليل التعلم</a>
+  <a href="guied.html">📘 دليل المتعلم</a>
   <a href="mods.html">📖 المحتوى التعليمي</a>
   <a href="pretest.html">📝 التقويم</a>
   <a href="trian.html" class="active">🧩 اختبار أساليب التعلم</a>
   <a href="contact.html">📞 اتصل بنا</a>
 </nav>
 
-
+<!-- ========== قفل الوصول: يظهر افتراضيًا ويُخفى فقط إذا أنهى الطالب الاختبار القبلي ========== -->
+<div id="accessLock" style="position:fixed;inset:0;background:rgba(27,74,74,.85);backdrop-filter:blur(8px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Cairo',sans-serif;">
+  <div style="background:#fff;border-radius:20px;max-width:460px;width:100%;padding:30px 26px;text-align:center;box-shadow:0 28px 70px rgba(27,74,74,.4);">
+    <div style="font-size:48px;margin-bottom:8px;">🔒</div>
+    <div style="font-size:17px;font-weight:800;color:#1b4a4a;margin-bottom:10px;">لا يمكنك دخول اختبار أساليب التعلم بعد</div>
+    <div style="font-size:13.5px;color:#4b5563;line-height:1.8;margin-bottom:20px;">
+      يجب عليك أولًا أداء وإنهاء <strong>الاختبار التحصيلي القبلي</strong> قبل أن يُتاح لك الدخول إلى اختبار أساليب التعلم.
+    </div>
+    <a href="pretest.html" style="display:inline-block;background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 26px;border-radius:12px;box-shadow:0 6px 18px rgba(27,107,90,.3);">
+      🏁 اذهب للاختبار التحصيلي القبلي
+    </a>
+  </div>
+</div>
+<script>
+  /* لا يظهر اختبار أساليب التعلم إلا بعد إنهاء الاختبار التحصيلي القبلي */
+  if (localStorage.getItem('preTestCompleted') || (window.ENV && ENV.CONFIG.OPEN_MODE)) {
+    document.getElementById('accessLock').style.display = 'none';
+  }
+</script>
 
 <!-- ========== شاشة التعليمات المستقلة (تظهر أولاً بملء الشاشة) ========== -->
 <div class="instr-overlay" id="instrOverlay">
@@ -358,7 +377,7 @@ body{display:flex;flex-direction:column;height:100vh}
         <div class="arow">
           <button class="btn bred" onclick="clearDraw()">🗑️ مسح</button>
           <button class="btn bgrn" id="subBtn" onclick="submitAns()">✅ تأكيد الإجابة</button>
-          <button class="btn bpri" id="nxtBtn" onclick="nextQ()">⏭️ تخطي والتالي ◀</button>
+          <button class="btn bpri" id="nxtBtn" onclick="nextQ()" style="display:none">السؤال التالي ◀</button>
         </div>
       </div>
 
@@ -380,30 +399,30 @@ body{display:flex;flex-direction:column;height:100vh}
 
         <div class="res-btns" id="resBtns" style="display:block;text-align:center;">
           <div id="autoRouteMsg" style="font-size:12.5px;color:#065f46;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:8px 12px;margin-bottom:8px;"></div>
-          <button class="rbtn" id="goEnvBtn" onclick="goToAssignedEnv()" style="width:100%;display:none;">🚀 انتقل الآن إلى بيئة التعلم المناسبة</button>
+          <button class="rbtn" id="goEnvBtn" onclick="goToAssignedEnv()" style="width:100%;display:none;">🚀 انتقل الآن إلى بيئتك وسجّل الدخول</button>
         </div>
         <div id="adminLinks" style="display:none">
-          <span id="urlA">https://worledtecnology-spec.github.io/Fixed-Support--g1/</span>
-          <span id="urlB">https://worledtecnology-spec.github.io/Fixed-Support--g2/</span>
-          <span id="urlC">https://worledtecnology-spec.github.io/Flexible-Support---g3/</span>
-          <span id="urlD">https://worledtecnology-spec.github.io/Flexible-Support---g4/</span>
+          <span id="urlA">https://worledtecnology-spec.github.io/testFixed-Support--g1/</span>
+          <span id="urlB">https://worledtecnology-spec.github.io/testFixed-Support--g2/</span>
+          <span id="urlC">https://worledtecnology-spec.github.io/testFlexible-Support---g3/</span>
+          <span id="urlD">https://worledtecnology-spec.github.io/testFlexible-Support---g4/</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
 /* ── إعداد Firebase (عدّاد متوازن مضمون لنمط الدعم) ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyDc8YHgGfZl5Rc97sLFI0NI-No9KrYWy1c",
-  authDomain: "trian-support.firebaseapp.com",
-  databaseURL: "https://trian-support-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "trian-support",
-  storageBucket: "trian-support.firebasestorage.app",
-  messagingSenderId: "65202851992",
-  appId: "1:65202851992:web:7f8fa7fa816d2c3f31c0ed"
+const firebaseConfig = (window.ENV && ENV.CONFIG.FIREBASE) || {
+  apiKey: "AIzaSyAt3Rco9l1z_L0s5fYaJhlI4JSiIttFKvc",
+  authDomain: "classroom-8de04.firebaseapp.com",
+  projectId: "classroom-8de04",
+  storageBucket: "classroom-8de04.firebasestorage.app",
+  messagingSenderId: "85766910317",
+  appId: "1:85766910317:web:e00a6be7155936b4ebaa64"
 };
 let _fbReady = false;
 try{
@@ -988,7 +1007,7 @@ function loadQ(idx){
   document.getElementById('qlbl').textContent=q.lbl;
   setFb('','');
   document.getElementById('subBtn').style.display='';
-  var nb=document.getElementById('nxtBtn'); nb.style.display=''; nb.textContent='⏭️ تخطي والتالي ◀';
+  document.getElementById('nxtBtn').style.display='none';
   updProg();
 
   const newSec=idx===0||Q[idx-1].sec!==q.sec;
@@ -1024,7 +1043,7 @@ function onTimeout(){
     drawCorrect();
     setFb('❌ انتهى الوقت! الإجابة الصحيحة مرسومة بالأخضر','err');
     document.getElementById('subBtn').style.display='none';
-    document.getElementById('nxtBtn').style.display=''; document.getElementById('nxtBtn').textContent='السؤال التالي ◀';
+    document.getElementById('nxtBtn').style.display='';
   }
 }
 
@@ -1131,7 +1150,7 @@ function submitAns(){
   }
 
   document.getElementById('subBtn').style.display='none';
-  document.getElementById('nxtBtn').style.display=''; document.getElementById('nxtBtn').textContent='السؤال التالي ◀';
+  document.getElementById('nxtBtn').style.display='';
 }
 
 /* Draw correct answer (green dashed) on top of complex shape — used for WRONG answers */
@@ -1235,7 +1254,7 @@ function continueSection(){
 
    نمط الدعم (ثابت / مرن) يُحدَّد تلقائيًا بحيث يتساوى العدد بين
    المجموعتين داخل كل تصنيف (معتمد يتوزع بالتساوي بين ثابت/مرن،
-   ومستقل كذلك بشكل منفصل) — عبر عدّاد مشترك على Firebase Realtime
+   ومستقل كذلك بشكل منفصل) — عبر عدّاد مشترك على Firebase (Cloud Firestore)
    Database (بمعاملة ذرّية transaction تمنع تضارب العدّ حتى لو
    طالبان أنهيا الاختبار في نفس اللحظة من جهازين مختلفين)، يعمل من
    أي جهاز (معمل مشترك أو جهاز شخصي)، مع نسخة احتياطية محلية
@@ -1247,11 +1266,13 @@ function continueSection(){
 */
 
 /* ★ عدّل الروابط هنا — كل مفتاح يقابل توليفة (تصنيف + نمط دعم) ★ */
+/* التوجيه إلى بيئة النمط المناسب: تظهر شاشة تسجيل الدخول الخاصة بها ثم المحتوى التعليمي */
+const ENV_OF = { btnA: 'g1', btnB: 'g2', btnC: 'g3', btnD: 'g4' };
 const URLS = {
-  btnA: 'https://worledtecnology-spec.github.io/Fixed-Support--g1/',        // معتمد + دعم ثابت
-  btnB: 'https://worledtecnology-spec.github.io/Fixed-Support--g2/',        // مستقل + دعم ثابت
-  btnC: 'https://worledtecnology-spec.github.io/Flexible-Support---g3/',    // معتمد + دعم مرن
-  btnD: 'https://worledtecnology-spec.github.io/Flexible-Support---g4/',    // مستقل + دعم مرن
+  btnA: '../testFixed-Support--g1/index.html',        // معتمد + دعم ثابت
+  btnB: '../testFixed-Support--g2/index.html',        // مستقل + دعم ثابت
+  btnC: '../testFlexible-Support---g3/index.html',    // معتمد + دعم مرن
+  btnD: '../testFlexible-Support---g4/index.html',    // مستقل + دعم مرن
 };
 
 function goTo(btn){
@@ -1265,18 +1286,12 @@ function goToAssignedEnv(){
 
 /* ── تحديد نمط الدعم بالتساوي (ثابت/مرن) عبر Firebase (معاملة ذرّية)، مع نسخة احتياطية محلية ── */
 async function getBalancedSupportType(bcls){
-  const path = bcls === 'dep' ? 'counters/dep' : 'counters/ind';
-  if(_fbReady){
-    try{
-      const ref = firebase.database().ref(path);
-      const result = await ref.transaction(current => (current || 0) + 1);
-      if(result.committed && typeof result.snapshot.val() === 'number'){
-        return (result.snapshot.val() % 2 === 1) ? 'fixed' : 'flex';
-      }
-      throw new Error('transaction not committed');
-    }catch(e){
-      /* يكمل تلقائيًا على النسخة الاحتياطية بالأسفل */
-    }
+  /* العدّاد المشترك في Cloud Firestore (معاملة ذرّية) — بعد استرجاع جلسة دخول الطالب */
+  if (window.ENV && ENV.counterNext) {
+    try {
+      const n = await ENV.counterNext(bcls);
+      if (typeof n === 'number') return (n % 2 === 1) ? 'fixed' : 'flex';
+    } catch (e) { /* يكمل على النسخة الاحتياطية بالأسفل */ }
   }
   /* نسخة احتياطية: تناوب محلي على نفس الجهاز لو تعذّر الاتصال بـ Firebase */
   const localKey = 'localSupportCounter_' + bcls;
@@ -1295,6 +1310,9 @@ async function showResults(){
   const scored = ans.filter((_,i) => Q[i].sec !== 1);
   const correct = scored.filter(a => a === true).length;
   const total   = scored.length;   // = 18
+
+  /* تسجيل إنهاء اختبار أساليب التعلم (أي نتيجة غير الصفر) — يُستخدم لفتح المحتوى التعليمي */
+  if (correct > 0) { try { localStorage.setItem('stylesTestCompleted', 'true'); } catch(e) {} }
 
   document.getElementById('rScr').textContent =
     `الدرجة: ${correct} من ${total}`;
@@ -1372,8 +1390,18 @@ async function showResults(){
                       : (supportType === 'fixed' ? 'btnB' : 'btnD');
 
     window._assignedBtn = assignedBtn;
+    /* حفظ النمط المحدد للطالب (يُستخدم في كل التبويبات + قاعدة البيانات) */
+    try { localStorage.setItem('stylesTestCompleted', 'true'); localStorage.setItem('assignedEnv', ENV_OF[assignedBtn]); } catch(e) {}
+    if (window.ENV) {
+      ENV.setProgress('stylesTestCompleted', true);
+      ENV.setProgress('stylesResult', bcls + ':' + correct);
+      ENV.setProgress('assignedEnv', ENV_OF[assignedBtn]);
+      ENV.track('styles', { score: correct, total: total, style: bcls, support: supportType, env: ENV_OF[assignedBtn] });
+      ENV.saveResult('styles', { score: correct, total: total, style: bcls, support: supportType, env: ENV_OF[assignedBtn] });
+      ENV.rebuildNav();
+    }
     document.getElementById('rBdg').textContent = badge + ' — ' + supportLabel;
-    autoRouteMsg.textContent = `🎯 بيئتك المناسبة: ${supportLabel}. سيتم نقلك تلقائيًا خلال لحظات...`;
+    autoRouteMsg.textContent = `🎯 بيئتك المناسبة: ${supportLabel}. سيتم نقلك تلقائيًا إلى بيئتك لتسجيل الدخول خلال لحظات...`;
     goEnvBtn.style.display = 'block';
     setTimeout(goToAssignedEnv, 4000);
 
@@ -1410,6 +1438,24 @@ function restartTest(){
 
   loadQ(0);
 }
+</script>
+
+<script>
+/* طالب تم تحديد نمطه من قبل: لا يُعاد الاختبار حتى لا يتغير توزيع المجموعات */
+document.addEventListener('DOMContentLoaded', function(){
+  if (!window.ENV || ENV.CONFIG.OPEN_MODE) return;
+  var a = localStorage.getItem('assignedEnv');
+  if (!a || !ENV.flag('stylesTestCompleted') || !ENV.CONFIG.SITES[a]) return;
+  var S = ENV.CONFIG.SITES[a];
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(27,74,74,.88);z-index:99990;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cairo,sans-serif;direction:rtl;';
+  d.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:460px;width:100%;padding:28px 24px;text-align:center;">'
+    + '<div style="font-size:48px;">✅</div>'
+    + '<div style="font-size:18px;font-weight:800;color:#1b4a4a;margin:6px 0;">أدّيت اختبار أساليب التعلم من قبل</div>'
+    + '<div style="font-size:13px;color:#4b5563;line-height:1.9;margin-bottom:16px;">أسلوب تعلمك: <b>' + S.styleLabel + '</b><br>نمط الدعم المحدد لك: <b>' + S.label + '</b></div>'
+    + '<a href="' + ENV.nextStepUrl() + '" style="display:inline-block;background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;text-decoration:none;font-weight:800;padding:12px 26px;border-radius:12px;">📖 اذهب إلى المحتوى التعليمي ←</a></div>';
+  document.body.appendChild(d);
+});
 </script>
 </body>
 </html>

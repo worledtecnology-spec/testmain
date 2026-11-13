@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script src="env.js" data-site="main"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>التقويم </title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -206,6 +207,7 @@ body { display: flex; flex-direction: column; height: 100vh; }
     border-radius: 0 20px 20px 0;
 }
 .test-card.pre::before  { background: linear-gradient(180deg, #1b6b5a, #2dd4bf); }
+.test-card.styles::before { background: linear-gradient(180deg, #7c3aed, #a78bfa); }
 .test-card.post::before { background: linear-gradient(180deg, #0a8545, #2dd4bf); }
 
 .test-card::after {
@@ -516,7 +518,7 @@ body { display: flex; flex-direction: column; height: 100vh; }
 <nav class="nav">
   <a href="index.html">🏠 الرئيسية</a>
   <a href="aims.html">🎯 أهداف البيئة</a>
-  <a href="guied.html">📚 دليل التعلم</a>
+  <a href="guied.html">📘 دليل المتعلم</a>
   <a href="mods.html">📖 المحتوى التعليمي</a>
   <a href="pretest.html" class="active">📝 التقويم</a>
   <a href="trian.html">🧩 اختبار أساليب التعلم</a>
@@ -526,7 +528,7 @@ body { display: flex; flex-direction: column; height: 100vh; }
 <div class="main">
 
   <div class="title-block">
-    <div class="eyebrow">📝 الاختبارات التحصيلية</div>
+    <div class="eyebrow">📝 التقويم</div>
     <div class="title-line"></div>
   </div>
 
@@ -540,6 +542,17 @@ body { display: flex; flex-direction: column; height: 100vh; }
       <div class="card-tag">قبل الدراسة</div>
       <div class="card-title">الاختبار التحصيلي<br>القبلي</div>
       <div class="card-desc">يُقيس مستوى معرفتك الحالية<br>قبل البدء في المحتوى التعليمي</div>
+      <button class="card-cta">ابدأ الاختبار ←</button>
+    </div>
+
+    <!-- اختبار أساليب التعلم (بعد القبلي مباشرة) -->
+    <div class="test-card styles" id="stylesCard" onclick="openStyles()">
+      <div class="lock-overlay">🔒</div>
+      <div class="completed-badge" id="stylesBadge">✅ تم الإجابة</div>
+      <div class="icon-wrap">🧩</div>
+      <div class="card-tag">بعد القبلي</div>
+      <div class="card-title">اختبار أساليب<br>التعلم</div>
+      <div class="card-desc">يحدد أسلوب تعلمك، وتوجّهك البيئة<br>بعده لنمط الدعم المناسب لك</div>
       <button class="card-cta">ابدأ الاختبار ←</button>
     </div>
 
@@ -557,10 +570,247 @@ body { display: flex; flex-direction: column; height: 100vh; }
 
 </div>
 
-<style>.lock-overlay,.completed-badge,.modal-backdrop{display:none!important}.test-card.locked-card{opacity:1!important;filter:none!important;pointer-events:auto!important;cursor:pointer!important}</style>
+<!-- ======== PASSWORD MODAL ======== -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-icon" id="modalIcon">🔐</div>
+    <div class="modal-title" id="modalTitle">أدخل بياناتك للدخول</div>
+    <div class="modal-subtitle" id="modalSubtitle">يرجى إدخال اسمك وكلمة المرور للمتابعة</div>
+
+    <!-- Already completed message (pre-test only) -->
+    <div class="already-done-msg" id="alreadyDoneMsg">
+      <div class="check-big">✅</div>
+      <p>لقد أجبت على الاختبار القبلي من قبل<br>ولا يمكن إعادة تقديمه مرة أخرى.</p>
+    </div>
+
+    <!-- Form fields -->
+    <div id="formFields">
+      <div class="form-group">
+        <label for="studentName">👤 اسم الطالب</label>
+        <input type="text" id="studentName" placeholder="أدخل اسمك الكامل" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="passwordInput">🔑 كلمة المرور</label>
+        <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور" autocomplete="new-password"
+               onkeydown="if(event.key==='Enter') submitModal()">
+      </div>
+      <div class="modal-error" id="modalError"></div>
+      <button class="modal-btn" onclick="submitModal()">دخول ←</button>
+    </div>
+
+  </div>
+</div>
+
 <script>
+// ============================================================
+//  إعدادات — غيّر الباسورد والوجهات هنا فقط
+// ============================================================
+var PASSWORDS    = { pre: "pre1234", post: "post1234" };
 var DESTINATIONS = { pre: "befor.html", post: "after.html" };
-function openModal(type) { window.location.href = DESTINATIONS[type]; }
+// ============================================================
+
+// روابط تُقفل حتى إتمام القبلي (poster وcontact متاحان دائماً)
+var LOCKED_HREFS = []; /* الأقفال يديرها env.js الموحّد */
+
+var currentType = null;
+
+// ===== localStorage =====
+function getCompletedList() {
+  try { return JSON.parse(localStorage.getItem('completedPreTest') || '[]'); }
+  catch(e) { return []; }
+}
+function hasCompleted(name) {
+  return getCompletedList().indexOf(name.trim().toLowerCase()) !== -1;
+}
+
+// ===== قفل/فتح الناف =====
+function lockNav() {
+  document.querySelectorAll('.nav a').forEach(function(link) {
+    var href = link.getAttribute('href') || '';
+    if (LOCKED_HREFS.indexOf(href) !== -1) {
+      link.classList.add('nav-locked');
+      link.dataset.orig = href;
+      link.removeAttribute('href');
+    }
+  });
+}
+function unlockNav() {
+  document.querySelectorAll('.nav a.nav-locked').forEach(function(link) {
+    link.classList.remove('nav-locked');
+    if (link.dataset.orig) { link.setAttribute('href', link.dataset.orig); delete link.dataset.orig; }
+  });
+  // المحتوى التعليمي يبقى مقفولًا حتى إنهاء اختبار أساليب التعلم أيضًا
+  if (!localStorage.getItem('stylesTestCompleted')) {
+    document.querySelectorAll('.nav a[href="mods.html"]').forEach(function(link) {
+      link.classList.add('nav-locked');
+      link.dataset.orig = 'mods.html';
+      link.removeAttribute('href');
+    });
+  }
+}
+
+// ===== فتح المودال =====
+/* بطاقة اختبار أساليب التعلم داخل التقويم */
+function openStyles() {
+  var openMode = window.ENV && ENV.CONFIG.OPEN_MODE;
+  if (!openMode && !localStorage.getItem('preTestCompleted')) { showToast('أكمل الاختبار التحصيلي القبلي أولاً'); return; }
+  window.location.href = 'trian.html';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var c = document.getElementById('stylesCard'); if (!c) return;
+  var openMode = window.ENV && ENV.CONFIG.OPEN_MODE;
+  if (!openMode && !localStorage.getItem('preTestCompleted')) c.classList.add('locked-card');
+  if (localStorage.getItem('stylesTestCompleted')) document.getElementById('stylesBadge').classList.add('show');
+});
+
+function openModal(type) {
+  var envU = (window.ENV && ENV.user()) || null;
+  var openMode = window.ENV && ENV.CONFIG.OPEN_MODE;
+  /* نسخة التحكيم: يفتح الاختبار مباشرة بلا اسم ولا كلمة مرور */
+  if (openMode && !envU) { window.location.href = (type === 'pre' ? 'befor.html' : 'after.html') + '?s=' + encodeURIComponent('المحكّم'); return; }
+  /* الاختبار القبلي: الطالب مسجّل دخوله بالفعل ← يبدأ مباشرة بدون بيانات إضافية */
+  if (type === 'pre' && !openMode) {
+    if (localStorage.getItem('preTestCompleted')) { showToast('لقد أديت الاختبار القبلي من قبل ولا يمكن إعادته'); return; }
+    if (envU) { window.location.href = 'befor.html?s=' + encodeURIComponent(envU.name); return; }
+  }
+  if (type === 'post' && !openMode && !localStorage.getItem('preTestCompleted')) {
+    showToast('أكمل الاختبار القبلي أولاً قبل الدخول للاختبار البعدي');
+    return;
+  }
+  if (type === 'post' && !openMode && !localStorage.getItem('stylesTestCompleted')) {
+    showToast('الاختبار البعدي يُؤدّى بعد اختبار أساليب التعلم ودراسة المحتوى التعليمي');
+    return;
+  }
+  currentType = type;
+  document.getElementById('studentName').value   = '';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('alreadyDoneMsg').classList.remove('show');
+  document.getElementById('formFields').style.display = 'block';
+  document.getElementById('modalIcon').textContent    = type === 'pre' ? '📋' : '🏆';
+  document.getElementById('modalTitle').textContent   = type === 'pre' ? 'الاختبار التحصيلي القبلي' : 'الاختبار التحصيلي البعدي';
+  document.getElementById('modalSubtitle').textContent = 'أدخل اسمك وكلمة المرور للبدء';
+  document.getElementById('modalBackdrop').classList.add('open');
+  /* الاسم يُؤخذ من حساب الدخول تلقائيًا */
+  var nm = document.getElementById('studentName');
+  if (envU) { nm.value = envU.name; nm.readOnly = true; nm.style.background = '#f0fdfa'; }
+  else { nm.readOnly = false; nm.style.background = ''; }
+  setTimeout(function(){ (envU ? document.getElementById('passwordInput') : nm).focus(); }, 300);
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  currentType = null;
+}
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+// ===== إرسال البيانات =====
+function submitModal() {
+  var name = document.getElementById('studentName').value.trim();
+  var pass = document.getElementById('passwordInput').value;
+
+  if (!name) { showModalError('يرجى إدخال اسمك أولاً'); return; }
+  if (!pass)  { showModalError('يرجى إدخال كلمة المرور'); return; }
+  if (!currentType || !PASSWORDS[currentType]) { showModalError('خطأ، أعد المحاولة'); return; }
+
+  // مقارنة الباسورد حرفياً بعد إزالة المسافات من الطرفين فقط
+  if (pass.trim() !== PASSWORDS[currentType]) {
+    showModalError('كلمة المرور غير صحيحة، حاول مرة أخرى');
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+    return;
+  }
+
+  // القبلي: منع التكرار
+  if (currentType === 'pre' && hasCompleted(name)) {
+    document.getElementById('formFields').style.display = 'none';
+    document.getElementById('alreadyDoneMsg').classList.add('show');
+    document.getElementById('modalTitle').textContent = 'تم تقديم الاختبار مسبقاً';
+    document.getElementById('modalSubtitle').textContent = '';
+    document.getElementById('modalIcon').textContent = '⚠️';
+    return;
+  }
+
+  // كل شيء صحيح — انتقل
+  var key = currentType === 'pre' ? 'pendingPreStudent' : 'pendingPostStudent';
+  try { sessionStorage.setItem(key, name); } catch(e) {}
+  var url = DESTINATIONS[currentType] + '?s=' + encodeURIComponent(name);
+  window.location.href = url;
+}
+
+function showModalError(msg) {
+  var el = document.getElementById('modalError');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  var toast = document.getElementById('lockToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'lockToast';
+    toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1b4a4a;color:#fff;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 8px 28px rgba(27,74,74,.4);border:2px solid #2dd4bf;display:none;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = '🔒 ' + msg;
+  toast.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ toast.style.display = 'none'; }, 3500);
+}
+
+// ===== تهيئة الصفحة =====
+document.addEventListener('DOMContentLoaded', function() {
+  // CSS للروابط المقفولة
+  var style = document.createElement('style');
+  style.textContent = '.nav a.nav-locked{opacity:.45;cursor:not-allowed!important;pointer-events:auto!important;}.nav a.nav-locked:hover{background:transparent!important;color:#e0f2f1!important;transform:none!important;box-shadow:none!important;}.nav a.nav-locked::after{content:"🔒";font-size:10px;margin-right:4px;}';
+  document.head.appendChild(style);
+
+  // منع النقر على المقفول
+  document.querySelector('.nav').addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (link && link.classList.contains('nav-locked')) {
+      e.preventDefault();
+      if (link.dataset.orig === 'mods.html' && localStorage.getItem('preTestCompleted')) {
+        showToast('أكمل اختبار أساليب التعلم أولاً للوصول إلى المحتوى التعليمي');
+      } else if (link.dataset.orig === 'mods.html') {
+        showToast('أكمل الاختبار القبلي ثم اختبار أساليب التعلم أولاً للوصول إلى المحتوى التعليمي');
+      } else {
+        showToast('أكمل الاختبار القبلي أولاً للوصول لهذا القسم');
+      }
+    }
+  });
+
+  var preIsDone   = !!localStorage.getItem('preTestCompleted');
+  var doneStudent = preIsDone ? 'done' : (sessionStorage.getItem('donePreStudent') || '');
+  /* فتح بطاقة الاختبار البعدي مباشرة عند الوصول من آخر درس (pretest.html#post) */
+  if (location.hash === '#post') setTimeout(function(){ openModal('post'); }, 350);
+
+  if (preIsDone) {
+    unlockNav();
+    if (doneStudent) {
+      document.getElementById('preCard').classList.add('locked-card');
+      document.getElementById('preBadge').classList.add('show');
+      document.getElementById('preCard').querySelector('.card-cta').textContent = '✅ تم الإجابة';
+    }
+    document.getElementById('postCard').classList.remove('locked-card');
+    document.getElementById('postCard').querySelector('.card-cta').textContent = 'ابدأ الاختبار ←';
+  } else {
+    lockNav();
+    var postCard = document.getElementById('postCard');
+    postCard.classList.add('locked-card');
+    postCard.querySelector('.card-cta').textContent = '🔒 متاح بعد القبلي';
+    if (doneStudent) {
+      document.getElementById('preCard').classList.add('locked-card');
+      document.getElementById('preBadge').classList.add('show');
+      document.getElementById('preCard').querySelector('.card-cta').textContent = '✅ تم الإجابة';
+    }
+  }
+});
 </script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script src="env.js" data-site="main"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الاختبار التحصيلي البعدي</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -530,7 +531,7 @@ body.c3 .question-num { display: none; }
 <div class="nav">
   <a href="index.html">🏠 الرئيسية</a>
   <a href="aims.html">🎯 أهداف البيئة</a>
-  <a href="guied.html">📚 دليل التعلم</a>
+  <a href="guied.html">📘 دليل المتعلم</a>
   <a href="mods.html">📖 المحتوى التعليمي</a>
   <a href="pretest.html" class="active">📝 التقويم</a>
   <a href="trian.html">🧩 اختبار أساليب التعلم</a>
@@ -661,8 +662,11 @@ body.c3 .question-num { display: none; }
             <div class="result-detail" id="resultDetail"></div>
             <div class="result-status" id="resultStatus" style="width:100%; border-radius:14px; padding:12px 16px; font-size:13px; font-weight:700; line-height:1.8;"></div>
             <div class="result-actions">
-                <button class="home-btn" id="goLearningStyleBtn" onclick="goToLearningStyle()" style="display:none; background:linear-gradient(135deg,#1b6b5a,#2dd4bf);">📖 الانتقال الآن إلى اختبار أسلوب التعلم ←</button>
-                <a href="index.html" class="home-btn">🏠 العودة للصفحة الرئيسية</a>
+                <div id="finalScreenNote" style="background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border:2px solid #6ee7b7;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:700;color:#065f46;line-height:1.9;text-align:center;">
+                  🏁 هذه هي <b>الشاشة الأخيرة</b> في بيئة التعلم — شكرًا لمشاركتك.<br>
+                  <span style="font-weight:600;color:#374151;">تم حفظ نتيجتك وإرسالها للباحثة. اضغط «إنهاء وتسجيل الخروج» للخروج من البيئة.</span>
+                </div>
+                <button class="home-btn" id="goLearningStyleBtn" onclick="if(window.ENV){ENV.logout();}else{location.href='index.html';}" style="background:linear-gradient(135deg,#1b6b5a,#2dd4bf);color:#fff;margin-top:8px;border:none;cursor:pointer;font-family:inherit;">🚪 إنهاء وتسجيل الخروج من البيئة</button>
             </div>
         </div>
     </div>
@@ -848,7 +852,7 @@ var examStarted   = false;
 // ===== بدء الاختبار =====
 function startExam() {
   var urlParams = new URLSearchParams(window.location.search);
-  var fromURL   = urlParams.get('s') || '';
+  var fromURL   = urlParams.get('s') || ((window.ENV && ENV.user()) ? ENV.user().name : '');
   var fromSS    = '';
   try { fromSS = sessionStorage.getItem('pendingPostStudent') || ''; } catch(e){}
   var inputEl   = document.getElementById('studentNameInput');
@@ -1032,20 +1036,39 @@ function submitExam() {
     statusEl.style.background = '#ecfdf5';
     statusEl.style.color = '#065f46';
     statusEl.style.border = '2px solid #6ee7b7';
-    statusEl.textContent = '🎉 تهانينا! لقد حققت الحد الأدنى للنجاح (' + PASS_PCT + '%). سيتم نقلك تلقائيًا إلى اختبار أسلوب التعلم خلال لحظات...';
-    goBtn.style.display = 'flex';
-    setTimeout(goToLearningStyle, 3000);
+    statusEl.textContent = '🎉 تهانينا! نسبتك ' + PASS_PCT + '% فأكثر في الاختبار التحصيلي البعدي، وبذلك تكون قد اجتزت المحتوى المقدم بنجاح.';
   } else {
     statusEl.style.background = '#fff7ed';
     statusEl.style.color = '#9a3412';
     statusEl.style.border = '2px solid #fdba74';
-    statusEl.textContent = '📚 لم تحقق الحد الأدنى (' + PASS_PCT + '%) في الاختبار البعدي. يُرجى مراجعة المحتوى التعليمي جيدًا، ثم يمكنك العودة والمحاولة مرة أخرى.';
-    goBtn.style.display = 'none';
+    statusEl.textContent = '📚 نسبتك أقل من ' + PASS_PCT + '% في الاختبار البعدي — ادرس محتوى الموديولات مرة أخرى، ثم أعد الاختبار البعدي من تبويب «التقويم».';
+    /* أقل من 50%: يعود الطالب لدراسة المحتوى ثم يعيد البعدي */
+    try {
+      var note = document.getElementById('finalScreenNote');
+      if (note) { note.style.background = '#fff7ed'; note.style.borderColor = '#fdba74'; note.style.color = '#9a3412';
+        note.innerHTML = '📖 لم تجتز الاختبار البعدي بعد. ارجع لدراسة <b>الموديول الثالث والرابع</b> مرة أخرى، ثم ادخل تبويب <b>«التقويم»</b> وأعد الاختبار البعدي.'; }
+      var gb = document.getElementById('goLearningStyleBtn');
+      if (gb && window.ENV) {
+        var a = localStorage.getItem('assignedEnv');
+        gb.textContent = '📖 العودة لدراسة المحتوى التعليمي';
+        gb.onclick = function(){ location.href = (a && ENV.CONFIG.SITES[a]) ? ENV.url(a, 'mods.html') : 'mods.html'; };
+      }
+    } catch(e) {}
   }
 
   try {
     sessionStorage.removeItem('pendingPostStudent');
   } catch(e){}
+  if (window.ENV) {
+    ENV.setProgress('postTestCompleted', true);
+    ENV.setProgress('postTestScore', pct);
+    ENV.track('posttest', { score: pct, correct: correct, wrong: wrong, unanswered: unanswered, total: questions.length });
+      ENV.saveResult('post', { score: pct, correct: correct, wrong: wrong, unanswered: unanswered, total: questions.length,
+        durationSec: Math.max(0, 90 * 60 - (typeof timeLeft === 'number' ? timeLeft : 0)),
+        /* لكل سؤال بالترتيب: 1 = صحيحة، 0 = خاطئة، - = بدون إجابة (لتحليل المفردات) */
+        detail: questions.map(function(q, i){ return answers[i] === null || answers[i] === undefined ? '-' : (answers[i] === q.correct ? '1' : '0'); }).join(''),
+        answers: JSON.stringify(answers) });
+  }
 
   document.getElementById('quizArea').style.display = 'none';
   document.querySelector('.quiz-header').style.display = 'none';
@@ -1058,6 +1081,18 @@ function goToLearningStyle() {
 
 // ===== تشغيل تلقائي عند تحميل الصفحة =====
 document.addEventListener('DOMContentLoaded', function() {
+  var style = document.createElement('style');
+  style.textContent = 'body.exam-active .nav a.nav-exam-locked{opacity:.45;cursor:not-allowed!important;pointer-events:auto!important;}.body.exam-active .nav a.nav-exam-locked:hover{background:transparent!important;color:#e0f2f1!important;transform:none!important;box-shadow:none!important;border-color:rgba(167,243,208,0.5)!important;}.nav a.nav-exam-locked::after{content:"🔒";font-size:10px;margin-right:3px;}';
+  document.head.appendChild(style);
+
+  document.querySelector('.nav').addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (link && link.classList.contains('nav-exam-locked') && examStarted) {
+      e.preventDefault();
+      showExamToast('لا يمكنك مغادرة الصفحة أثناء الاختبار');
+    }
+  });
+
   var urlParams = new URLSearchParams(window.location.search);
   var fromURL   = urlParams.get('s') || '';
   var fromSS    = '';
@@ -1082,9 +1117,13 @@ function showExamToast(msg) {
   toast._t = setTimeout(function(){ toast.style.display = 'none'; }, 3000);
 }
 </script>
+
+
 <script>
 // ===== التنقل بين شاشة التعليمات وشاشة الاسم =====
 function knownStudentName() {
+  var envU = (window.ENV && ENV.user()) || null;
+  if (envU) return envU.name;
   var fromURL = new URLSearchParams(window.location.search).get('s') || '';
   var fromSS = '';
   try { fromSS = sessionStorage.getItem('pendingPostStudent') || ''; } catch(e) {}
