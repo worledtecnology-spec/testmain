@@ -55,6 +55,12 @@ service cloud.firestore {
       allow read, delete: if isResearcher();
     }
 
+    // لوحة الإعلانات: يقرؤها الجميع (الطلاب ونسخة التحكيم) وتكتبها الباحثة فقط
+    match /announcements/{id} {
+      allow read: if true;
+      allow write: if isResearcher();
+    }
+
     // عدّاد التوزيع المتوازن لنمط الدعم
     match /counters/{id} {
       allow read, write: if signedIn();

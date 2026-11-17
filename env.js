@@ -378,7 +378,6 @@
     var T = [
       { k: 'home',    ico: '🏠', label: 'الرئيسية',             href: url('main', 'home.html') },
       { k: 'guide',   ico: '📘', label: 'دليل المتعلم',          href: url('main', 'guied.html') },
-      { k: 'instr',   ico: '📋', label: 'التعليمات',             href: url('main', 'instructions.html') },
       { k: 'aims',    ico: '🎯', label: 'أهداف البيئة',          href: url('main', 'aims.html') },
       { k: 'eval',    ico: '📝', label: 'التقويم',               href: url('main', 'pretest.html') },
       { k: 'styles',  ico: '🧩', label: 'اختبار أساليب التعلم',  href: url('main', 'trian.html'),
@@ -395,14 +394,14 @@
     if (CONFIG.RESEARCHER) T.push({ k: 'admin', ico: '📊', label: 'لوحة الباحثة', href: url('main', 'admin.html') });
     if (!CONFIG.OPEN_MODE && !user()) {
       T.forEach(function (t) {
-        if (['guide', 'instr', 'contact'].indexOf(t.k) === -1) t.lock = 'سجّل الدخول أولاً من زر «دخول الطالب» أعلى الشاشة';
+        if (['guide', 'contact'].indexOf(t.k) === -1) t.lock = 'سجّل الدخول أولاً من زر «دخول الطالب» أعلى الشاشة';
       });
     }
     return T;
   }
   function activeKey() {
     var map = {
-      'home.html': 'home', 'guied.html': 'guide', 'instructions.html': 'instr', 'aims.html': 'aims',
+      'home.html': 'home', 'guied.html': 'guide', 'instructions.html': 'guide', 'aims.html': 'aims',
       'pretest.html': 'eval', 'befor.html': 'eval', 'after.html': 'eval', 'trian.html': 'styles',
       'mods.html': 'content', 'mod3lessons.html': 'content', 'mod4lessons.html': 'content',
       'poster.html': 'poster', 'contact.html': 'contact', 'admin.html': 'admin'
@@ -442,9 +441,9 @@
       var k = a.getAttribute('data-tab');
       var inExam = document.body.classList.contains('exam-active');
       if (inExam) {
-        /* أثناء الاختبار: التعليمات ودليل المتعلم تُفتح في نافذة جديدة حتى لا يضيع الاختبار */
-        if (k === 'instr' || k === 'guide') { e.preventDefault(); window.open(a.href, '_blank'); return; }
-        e.preventDefault(); toast('🔒 لا يمكنك مغادرة الصفحة أثناء الاختبار — يمكنك فتح «التعليمات» أو «دليل المتعلم» فقط'); return;
+        /* أثناء الاختبار: دليل المتعلم يُفتح في نافذة جديدة حتى لا يضيع الاختبار */
+        if (k === 'guide') { e.preventDefault(); window.open(a.href, '_blank'); return; }
+        e.preventDefault(); toast('🔒 لا يمكنك مغادرة الصفحة أثناء الاختبار — يمكنك فتح «دليل المتعلم» فقط'); return;
       }
       if (a.classList.contains('env-locked')) { e.preventDefault(); toast('🔒 ' + a.getAttribute('data-lock')); return; }
       if (k === 'logout' && user()) { e.preventDefault(); logout(); return; }

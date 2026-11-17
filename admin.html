@@ -71,6 +71,7 @@ tr:hover td{background:#f8fffd;}
     <a href="#accounts">➕ إنشاء حسابات الطلاب</a>
     <a href="#activities">📝 إجابات الأنشطة</a>
     <a href="#log">🕒 سجل نشاط الطلاب</a>
+    <a href="#ann">📢 لوحة الإعلانات</a>
     <a href="#researchers">🎓 حسابات الباحثين</a>
   </div>
   <div class="row" style="margin-bottom:10px;">
@@ -115,7 +116,7 @@ tr:hover td{background:#f8fffd;}
         <div style="display:grid;gap:8px;">
           <input id="aName" placeholder="اسم الطالب (كما يظهر في البيئة)">
           <input id="aUser" placeholder="اسم المستخدم (إنجليزي بدون مسافات) مثل: s001" dir="ltr" style="text-align:right;">
-          <div class="row"><input id="aPass" placeholder="كلمة المرور (6 أحرف على الأقل)" dir="ltr" style="flex:1;text-align:right;"><button class="ghost" onclick="$('aPass').value=genPass()">🎲 توليد</button></div>
+          <div class="row"><input id="aPass" placeholder="كلمة المرور (6 أرقام/أحرف على الأقل) — اتركها فارغة لتوليد 6 أرقام" dir="ltr" style="flex:1;text-align:right;"><button class="ghost" onclick="$('aPass').value=genPass()">🎲 توليد</button></div>
           <button onclick="addOne()" id="aBtn">إنشاء الحساب</button>
           <div class="msg" id="aMsg"></div>
         </div>
@@ -159,6 +160,27 @@ tr:hover td{background:#f8fffd;}
   </section>
 
   <!-- ============ الباحثون ============ -->
+  <section class="pane" id="ann">
+    <div class="grid2">
+      <div class="box"><h3>📢 نشر إعلان / تذكير للطلاب</h3>
+        <div class="muted" style="margin-bottom:6px;">يظهر الإعلان فورًا في «لوحة الإعلانات» لدى الطلاب، مثل التذكير بالانتهاء من النشاط وتسليمه أو موعد الاختبار البعدي.</div>
+        <div style="display:grid;gap:8px;">
+          <input id="anTitle" placeholder="عنوان الإعلان (مثال: تذكير بتسليم نشاط الدرس الرابع)">
+          <textarea id="anText" rows="5" placeholder="نص الإعلان..." dir="auto"></textarea>
+          <div class="row">
+            <label class="muted">النوع:</label>
+            <select id="anType"><option value="urgent">🔴 عاجل</option><option value="info" selected>🔵 تذكير / توجيه</option></select>
+            <label class="muted">يظهر لـ:</label>
+            <select id="anTarget"><option value="all">كل الطلاب (الأنماط الأربعة)</option></select>
+          </div>
+          <div class="row"><button onclick="saveAnn()" id="anBtn">📢 نشر الإعلان</button><button class="ghost" onclick="resetAnn()">مسح الحقول</button></div>
+          <div class="msg" id="anMsg"></div>
+        </div>
+      </div>
+      <div class="box"><h3>الإعلانات المنشورة</h3><div class="muted" style="margin-bottom:6px;">يمكنك إخفاء الإعلان مؤقتًا أو تعديله أو حذفه.</div><div class="tblwrap"><table id="anTbl"></table></div></div>
+    </div>
+  </section>
+
   <section class="pane" id="researchers">
     <div class="grid2">
       <div class="box"><h3>➕ إضافة حساب باحث/مشرف</h3>
@@ -183,7 +205,7 @@ tr:hover td{background:#f8fffd;}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
-var D = { students:{}, progress:{}, results:{}, activities:{}, logs:{}, researchers:{} };
+var D = { students:{}, progress:{}, results:{}, activities:{}, logs:{}, researchers:{}, announcements:{} };
 var ENVN = { g1:'بيئة 1: دعم ثابت / معتمد', g2:'بيئة 2: دعم ثابت / مستقل', g3:'بيئة 3: دعم مرن / معتمد', g4:'بيئة 4: دعم مرن / مستقل' };
 var STYLEN = { dep:'معتمد على المجال', ind:'مستقل عن المجال' };
 var EVN = { login:'دخول', logout:'خروج', pretest:'الاختبار القبلي', styles:'اختبار أساليب التعلم', posttest:'الاختبار البعدي', view:'فتح قسم درس', skill:'مشاهدة مهارة', activity:'تسليم نشاط' };
@@ -196,7 +218,8 @@ function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function fmt(d){ if(!d) return '—'; try { return new Date(d).toLocaleString('ar-EG',{dateStyle:'short',timeStyle:'short'}); } catch(e){ return d; } }
 function v(x){ return (x===null||x===undefined||x==='')?'—':x; }
-function genPass(){ var c='abcdefghjkmnpqrstuvwxyz23456789', p=''; for(var i=0;i<7;i++) p+=c[Math.floor(Math.random()*c.length)]; return p; }
+/* كلمة مرور سهلة للطالب: 6 أرقام */
+function genPass(){ var p=''; for(var i=0;i<6;i++) p+=Math.floor(Math.random()*10); if(p[0]==='0') p='1'+p.slice(1); return p; }
 function showMsg(id, ok, t){ var m=$(id); m.className='msg '+(ok?'ok':'err'); m.innerHTML=t; }
 function db(){ return firebase.firestore(); }
 function colMap(name){ return db().collection(name).get().then(function(q){ var o={}; q.forEach(function(d){ o[d.id]=d.data(); }); return o; }); }
@@ -218,14 +241,50 @@ function loadAll(){
     var au = firebase.auth().currentUser;
     if(!au){ ENV.logout(); throw {code:'auth/session'}; }
     var keys=['students','progress','results','activities','researchers'];
+    var annP=colMap('announcements').then(function(o){ D.announcements=o; })['catch'](function(){ D.announcements=D.announcements||{}; });
     var logsP=db().collection('logs').orderBy('at','desc').limit(5000).get().then(function(q){
       var L={}; q.forEach(function(d){ var x=d.data(); (L[x.uid]=L[x.uid]||{})[d.id]=x; }); D.logs=L; });
-    return Promise.all(keys.map(function(k){ return colMap(k).then(function(o){ D[k]=o; }); }).concat([logsP]));
+    return Promise.all(keys.map(function(k){ return colMap(k).then(function(o){ D[k]=o; }); }).concat([logsP, annP]));
   }).then(function(){
     renderAll();
     $('status').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG')+' — عدد الطلاب: '+Object.keys(D.students).length;
   }).catch(function(e){ $('status').textContent='⚠️ '+ENV.authMsg(e); });
 }
+
+/* ---------- لوحة الإعلانات ---------- */
+var AN_EDIT=null;
+function annTargets(){
+  var sel=$('anTarget'); if(!sel || sel.options.length>1) return;
+  Object.keys(ENV.CONFIG.SITES).forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent='بيئة '+ENV.CONFIG.SITES[k].label+' فقط'; sel.appendChild(o); });
+}
+function renderAnn(){
+  annTargets();
+  var A=D.announcements||{}, ids=Object.keys(A).sort(function(a,b){ return String(A[b].createdAt||'').localeCompare(String(A[a].createdAt||'')); });
+  var T=function(t){ return t==='all'?'كل الطلاب':((ENV.CONFIG.SITES[t]||{}).label||t); };
+  $('anTbl').innerHTML='<tr><th>العنوان</th><th>النوع</th><th>يظهر لـ</th><th>التاريخ</th><th>الحالة</th><th></th></tr>'+
+    (ids.length? ids.map(function(id){ var a=A[id];
+      return '<tr><td><b>'+esc(a.title)+'</b><div class="muted" style="max-width:340px;white-space:pre-wrap;">'+esc(a.text)+'</div></td><td>'+(a.type==='urgent'?'🔴 عاجل':'🔵 تذكير')+'</td><td>'+esc(T(a.target||'all'))+'</td><td>'+esc(String(a.createdAt||'').slice(0,10))+'</td><td>'+(a.active===false?'⏸️ مخفي':'✅ ظاهر')+'</td>'+
+        '<td style="white-space:nowrap;"><button class="ghost" onclick="editAnn(\''+id+'\')">✏️</button> <button class="ghost" onclick="toggleAnn(\''+id+'\')">'+(a.active===false?'إظهار':'إخفاء')+'</button> <button class="ghost" onclick="delAnn(\''+id+'\')">🗑️</button></td></tr>';
+    }).join('') : '<tr><td colspan="6" class="muted">لا توجد إعلانات منشورة بعد.</td></tr>');
+}
+function resetAnn(){ AN_EDIT=null; $('anTitle').value=''; $('anText').value=''; $('anType').value='info'; $('anTarget').value='all'; $('anBtn').textContent='📢 نشر الإعلان'; }
+function editAnn(id){ var a=(D.announcements||{})[id]; if(!a) return; AN_EDIT=id; $('anTitle').value=a.title||''; $('anText').value=a.text||''; $('anType').value=a.type||'info'; $('anTarget').value=a.target||'all'; $('anBtn').textContent='💾 حفظ التعديل'; $('anTitle').focus(); }
+function saveAnn(){
+  var t=$('anTitle').value.trim(), x=$('anText').value.trim();
+  if(!t || !x) return showMsg('anMsg',false,'اكتب عنوان الإعلان ونصه.');
+  var o={ title:t, text:x, type:$('anType').value, target:$('anTarget').value, updatedAt:new Date().toISOString() };
+  var ref = AN_EDIT ? db().collection('announcements').doc(AN_EDIT) : db().collection('announcements').doc();
+  if(!AN_EDIT){ o.createdAt=o.updatedAt; o.active=true; o.by=(ENV.user()||{}).name||''; }
+  $('anBtn').disabled=true;
+  ref.set(o,{merge:true}).then(function(){
+    D.announcements=D.announcements||{}; D.announcements[ref.id]=Object.assign({}, D.announcements[ref.id]||{}, o);
+    showMsg('anMsg',true, AN_EDIT?'تم حفظ التعديل.':'تم نشر الإعلان، ويظهر الآن في لوحة إعلانات الطلاب.'); resetAnn(); renderAnn();
+  }).catch(function(e){ showMsg('anMsg',false,'تعذر الحفظ: '+ENV.authMsg(e)); }).then(function(){ $('anBtn').disabled=false; });
+}
+function toggleAnn(id){ var a=D.announcements[id]; var v=(a.active===false);
+  db().collection('announcements').doc(id).set({active:v},{merge:true}).then(function(){ a.active=v; renderAnn(); }).catch(function(e){ alert(ENV.authMsg(e)); }); }
+function delAnn(id){ if(!confirm('حذف هذا الإعلان نهائيًا؟')) return;
+  db().collection('announcements').doc(id).delete().then(function(){ delete D.announcements[id]; renderAnn(); }).catch(function(e){ alert(ENV.authMsg(e)); }); }
 
 function rows(){
   return Object.keys(D.students).map(function(uid){
@@ -246,7 +305,7 @@ function rows(){
   }).sort(function(x,y){ return String(x.username).localeCompare(String(y.username)); });
 }
 
-function renderAll(){ renderOverview(); renderStudents(); renderCreds(); renderActivities(); renderLog(); renderResearchers(); }
+function renderAll(){ renderOverview(); renderStudents(); renderCreds(); renderActivities(); renderLog(); renderResearchers(); renderAnn(); }
 
 function renderOverview(){
   var R=rows(), n=R.length;
