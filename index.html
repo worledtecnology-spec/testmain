@@ -63,7 +63,7 @@ body{display:flex;flex-direction:column;min-height:100vh;}
     <div class="login-art">
       <img src="img/login.png" alt="صورة تعبيرية عن التعلم">
       <h2>تسجيل الدخول</h2>
-      <p>مرحبًا بك في بيئة التعلم المدمج<br>اختر من أعلى الشاشة: «تسجيل دخول الطالب» أو «تسجيل دخول الباحثة»</p>
+      <p>مرحبًا بك في بيئة التعلم المدمج<br>تسجيل دخول الباحثة لمتابعة الطلاب وإدارة البيئة</p>
     </div>
 
     <div class="login-form">
@@ -153,6 +153,9 @@ function showErr(id, msg){ var e = $(id); e.textContent = '⚠️ ' + msg; e.sty
 
 (function(){
   var u = ENV.user();
+  /* نسخة الطلاب: لا يوجد تسجيل دخول للطالب هنا — الرابط يفتح الشاشة الرئيسية والاختبارات مباشرة.
+     هذه الشاشة للباحثة (#researcher)، وللطالب العائد من جهاز آخر فقط (#student) */
+  if (!u && !ENV.CONFIG.OPEN_MODE && location.hash !== '#researcher' && location.hash !== '#student') { location.replace('home.html'); return; }
   if (u) {
     $('formBox').style.display = 'none';
     $('already').style.display = 'block';
@@ -166,7 +169,7 @@ function showErr(id, msg){ var e = $(id); e.textContent = '⚠️ ' + msg; e.sty
   }
   if (location.hash === '#researcher') setRole('researcher');
   /* زرا «تسجيل دخول الطالب / الباحثة» أعلى الشاشة يبدّلان النموذج */
-  window.addEventListener('hashchange', function(){ if (!ENV.user()) { setRole(location.hash === '#researcher' ? 'researcher' : 'student'); $('username').focus(); } });
+  window.addEventListener('hashchange', function(){ if (!ENV.user()) { if (!ENV.CONFIG.OPEN_MODE && location.hash !== '#researcher' && location.hash !== '#student') { location.replace('home.html'); return; } setRole(location.hash === '#researcher' ? 'researcher' : 'student'); $('username').focus(); } });
   ['username','password'].forEach(function(id){ $(id).addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); }); });
 })();
 
@@ -179,6 +182,7 @@ function doLogin(){
   var p = ROLE === 'student' ? ENV.loginStudent(un, pw) : ENV.loginResearcher(un, pw);
   p.then(function(){
     btn.textContent = '✅ تم الدخول';
+    if (ROLE === 'student') { var a = localStorage.getItem('assignedEnv'); if (a) ENV.setGroupOK(a); }
     location.href = ROLE === 'student' ? ENV.nextStepUrl() : 'admin.html';
   }).catch(function(e){
     btn.disabled = false; btn.textContent = 'دخول';

@@ -292,7 +292,7 @@ function rows(){
     var logs=Object.keys(lg).map(function(k){return lg[k];});
     return { uid:uid, s:s, p:p, r:r, a:a, logs:logs,
       username:s.username, name:s.name, active:s.active!==false,
-      logins: logs.filter(function(x){return x.ev==='login' && (!x.site || x.site==='main');}).length,
+      logins: logs.filter(function(x){return x.ev==='login';}).length,
       lastLogin: s.lastLogin, lastSeen: logs.reduce(function(m,x){return x.at>m?x.at:m;},''),
       pre: r.pre?r.pre.score:(p.preTestScore!=null?p.preTestScore:null),
       preCorrect: r.pre?r.pre.correct:null,

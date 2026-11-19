@@ -28,7 +28,7 @@ service cloud.firestore {
       allow read: if isResearcher() || isOwner(uid);
       allow write: if isResearcher();
       allow update: if isOwner(uid)
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']);
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin', 'testName']);
     }
 
     match /usernames/{name} {
@@ -62,8 +62,13 @@ service cloud.firestore {
     }
 
     // عدّاد التوزيع المتوازن لنمط الدعم
+    // عدّاد التوزيع: يُستخدم في اختبار أساليب التعلم قبل تسجيل الدخول،
+    // لذلك مسموح للجميع بزيادته بمقدار 1 فقط، والباحثة لها التحكم الكامل
     match /counters/{id} {
-      allow read, write: if signedIn();
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['n']) && request.resource.data.n == 1;
+      allow update: if request.resource.data.keys().hasOnly(['n']) && request.resource.data.n == resource.data.n + 1;
+      allow write: if isResearcher();
     }
   }
 }

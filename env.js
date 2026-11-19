@@ -176,6 +176,17 @@
   }
   /* حفظ نتيجة اختبار كاملة (قبلي/بعدي/أساليب التعلم) لتظهر للباحثة وتُحمَّل كدرجات */
   function saveResult(kind, data) {
+    /* قبل تسجيل الدخول (الاختبار القبلي وأساليب التعلم مفتوحين بدون دخول):
+       تُحفظ النتيجة على الجهاز، وتُرفع لحساب الطالب تلقائيًا عند دخوله لبيئة الدعم */
+    if (!user() && !CONFIG.OPEN_MODE) {
+      try {
+        var pend = JSON.parse(ls('envPending') || '{}');
+        pend[kind] = clean(Object.assign({ at: now() }, data || {}));
+        pend.name = pend.name || ls('preTestStudentName') || '';
+        ls('envPending', JSON.stringify(pend));
+      } catch (e) {}
+      return Promise.resolve();
+    }
     return withStudent(function (db, uid) {
       data = clean(Object.assign({ at: now() }, data || {}));
       var o = {}; o[kind] = data;
@@ -201,7 +212,7 @@
   /* عدّاد التوزيع المتوازن لنمط الدعم (معاملة ذرّية) — يرجع الرقم الجديد أو null */
   function counterNext(name) {
     return fb().then(function (db) {
-      if (!db || !authUser()) return null;
+      if (!db) return null;   /* يعمل قبل تسجيل الدخول (الاختبارات مفتوحة بدون دخول) */
       var ref = db.collection('counters').doc(name);
       return db.runTransaction(function (t) {
         return t.get(ref).then(function (s) {
@@ -252,8 +263,27 @@
   }
 
   /* دخول الطالب: اسم المستخدم + كلمة المرور */
+  /* رفع نتائج الاختبارات التي أُدّيت قبل تسجيل الدخول إلى حساب الطالب */
+  function flushAnon(db, uid, anon) {
+    var pend = null; try { pend = JSON.parse(ls('envPending') || 'null'); } catch (e) {}
+    var jobs = [db.collection('progress').doc(uid).set(clean(anon), { merge: true })];
+    ['pre', 'styles'].forEach(function (k) {
+      if (pend && pend[k]) {
+        var o = {}; o[k] = pend[k];
+        jobs.push(db.collection('results').doc(uid).set(o, { merge: true }));
+        jobs.push(db.collection('results').doc(uid).collection('attempts').add(Object.assign({ kind: k }, pend[k])));
+        jobs.push(db.collection('logs').add(clean(Object.assign({ uid: uid, ev: k === 'pre' ? 'pretest' : 'styles', at: pend[k].at || now(), site: 'main', page: k === 'pre' ? 'befor.html' : 'trian.html' },
+          k === 'pre' ? { score: pend[k].score } : { score: pend[k].score, style: pend[k].style, env: pend[k].env }))));
+      }
+    });
+    if (pend && pend.name) jobs.push(db.collection('students').doc(uid).set({ testName: pend.name }, { merge: true }));
+    return Promise.all(jobs.map(function (p) { return p['catch'](function () {}); })).then(function () { ls('envPending', null); });
+  }
+
   function loginStudent(username, password) {
     username = String(username || '').trim().toLowerCase();
+    var prevU = user();
+    var anon = (!prevU) ? progressSnapshot() : null;      // تقدّم الاختبارات قبل الدخول
     return fb().then(function (db) {
       if (!db) throw err('env/offline');
       return firebase.auth().signInWithEmailAndPassword(studentEmail(username), password).then(function (cred) {
@@ -267,9 +297,13 @@
           return fetchRemoteProgress(uid).then(function (res) {
             /* قاعدة البيانات هي المرجع: تقدّم الطالب يُسترجع منها على أي جهاز،
                وإذا أعادت الباحثة ضبط الطالب يبدأ من جديد */
-            if (res && res.ok) applyProgress(res.val || {});
+            var remote = (res && res.ok) ? (res.val || {}) : null;
+            var up = Promise.resolve();
+            if (remote && remote.preTestCompleted) applyProgress(remote);              // أدّى الاختبارات من قبل
+            else if (anon && anon.preTestCompleted) { applyProgress(anon); up = flushAnon(db, uid, anon); }  // أدّاها الآن قبل الدخول
+            else if (remote) applyProgress(remote);
             saveProgress();
-            return Promise.all([
+            return Promise.all([up,
               db.collection('students').doc(uid).update({ lastLogin: now() })['catch'](function () {}),
               track('login')
             ]);
@@ -323,6 +357,14 @@
     });
   }
 
+  /* جهاز مشترك (معمل): طالب جديد يبدأ الاختبارات بعد طالب لم يسجّل دخوله بعد */
+  function newDeviceStudent() {
+    if (user()) return;
+    if (ls('envPending') && !confirm('نتائج الطالب السابق على هذا الجهاز لم تُرفع بعد (لم يسجّل دخوله لبيئة الدعم). هل تريد مسحها والبدء كطالب جديد؟')) return;
+    applyProgress({}); ls('envPending', null); ls('preTestStudentName', null); ls('completedPreTest', null);
+    location.href = url('main', 'home.html');
+  }
+
   function logout() {
     var u = user();
     saveProgress();
@@ -331,8 +373,8 @@
     ls('envGroupOK', null);
     applyProgress({});
     p.then(function () { return fb(); }).then(function (db) { if (db) return firebase.auth().signOut(); })['catch'](function () {})
-      .then(function () { location.href = url('main', 'index.html'); });
-    setTimeout(function () { location.href = url('main', 'index.html'); }, 2500);
+      .then(function () { location.href = url('main', 'home.html'); });
+    setTimeout(function () { location.href = url('main', 'home.html'); }, 2500);
   }
 
   /* ---------- رسائل قصيرة ---------- */
@@ -358,7 +400,14 @@
     if (PAGE === 'admin.html') { var ru = user(); return (ru && ru.role === 'researcher') ? true : go(url('main', 'index.html') + '#researcher'); }
     if (CONFIG.OPEN_MODE) return true;
     if (SITE === 'main' && PUBLIC_PAGES.indexOf(PAGE) !== -1) return true; // شاشة الدخول + الدليل والتعليمات (تُقرأ قبل الدخول)
-    if (!user()) return go(url('main', 'index.html'));
+    if (SITE === 'main') {
+      /* الشاشة الرئيسية والاختبار القبلي واختبار أساليب التعلم مفتوحة بدون تسجيل دخول */
+      if (PAGE === 'trian.html' && !flag('preTestCompleted')) return go(url('main', 'befor.html'));
+      if (PAGE === 'after.html' && !user()) return go(url('main', 'pretest.html'));
+      return true;
+    }
+    /* بيئات الدعم: الدخول باسم المستخدم وكلمة المرور من شاشة دخول البيئة */
+    if (!user()) return PAGE === 'index.html' ? true : go(url(SITE, 'index.html'));
     if (SITE !== 'main') {
       if (!flag('stylesTestCompleted') || !ls('assignedEnv')) return go(url('main', 'mods.html'));
       var a = ls('assignedEnv');
@@ -392,11 +441,6 @@
     ];
     if (CONFIG.OPEN_MODE) T.push({ k: 'patterns', ico: '🔀', label: 'الأنماط الأربعة', href: url('main', 'mods.html') });
     if (CONFIG.RESEARCHER) T.push({ k: 'admin', ico: '📊', label: 'لوحة الباحثة', href: url('main', 'admin.html') });
-    if (!CONFIG.OPEN_MODE && !user()) {
-      T.forEach(function (t) {
-        if (['guide', 'contact'].indexOf(t.k) === -1) t.lock = 'سجّل الدخول أولاً من زر «دخول الطالب» أعلى الشاشة';
-      });
-    }
     return T;
   }
   function activeKey() {
@@ -431,7 +475,6 @@
       var onLogin = (SITE === 'main' && PAGE === 'index.html');
       var role = (location.hash === '#researcher') ? 'researcher' : 'student';
       return '<span class="env-auth">' + (CONFIG.OPEN_MODE ? '<span class="env-hello">🔓 نسخة التحكيم</span>' : '') +
-             '<a href="' + esc(url('main', 'index.html')) + '#student" data-tab="login-student" class="env-btn env-in' + (onLogin && role === 'student' ? ' on' : '') + '" target="_self">👨‍🎓 تسجيل دخول الطالب</a>' +
              '<a href="' + esc(url('main', 'index.html')) + '#researcher" data-tab="login-researcher" class="env-btn env-in' + (onLogin && role === 'researcher' ? ' on' : '') + '" target="_self">🎓 تسجيل دخول الباحثة</a></span>';
     })();
     if (nav._envBound) return;            // يُربط مرة واحدة حتى لو أُعيد بناء الشريط
@@ -500,7 +543,8 @@
     setupStatus: setupStatus, createFirstResearcher: createFirstResearcher, studentEmail: studentEmail,
     setProgress: setProgress, saveProgress: saveProgress, nextStepUrl: nextStepUrl,
     track: track, fb: fb, counterNext: counterNext, toast: toast, rebuildNav: buildNav,
-    saveResult: saveResult, saveActivity: saveActivity, groupOK: groupOK, setGroupOK: setGroupOK
+    saveResult: saveResult, saveActivity: saveActivity, groupOK: groupOK, setGroupOK: setGroupOK,
+    newDeviceStudent: newDeviceStudent
   };
 
   if (!guard()) { document.documentElement.style.visibility = 'hidden'; return; }
@@ -513,7 +557,7 @@
       var au = authUser();
       if (!au || au.uid !== u.uid) {
         ls('envUser', null); applyProgress({});
-        if (!(SITE === 'main' && PUBLIC_PAGES.indexOf(PAGE) !== -1)) location.replace(url('main', 'index.html'));
+        if (SITE !== 'main') location.replace(url(SITE, 'index.html'));
         else if (window.ENV && ENV.rebuildNav) location.reload();
       }
     });
