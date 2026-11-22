@@ -5,7 +5,7 @@
    • تسجيل الدخول والخروج + حفظ تقدّم كل طالب على حدة
    • مسار السير: دخول ← اختبار قبلي ← اختبار أساليب التعلم ← توجيه تلقائي
      لنمط الدعم المناسب ← المحتوى التعليمي ← الاختبار البعدي (آخر شاشة)
-   • شعار جامعة الزقازيق يمينًا وشعار كلية التربية النوعية يسارًا في كل الشاشات
+   • شعار جامعة الزقازيق يمينًا وشعار قسم تكنولوجيا التعليم والحاسب الآلي يسارًا في كل الشاشات
    • تسجيل دخول الطلاب وتقدّمهم في قاعدة بيانات Firebase لتتبعهم
    --------------------------------------------------------------------------
    ★ النسختان: المغلقة (للطلاب) والمفتوحة (للتحكيم) ★
@@ -500,7 +500,7 @@
   }
 
   /* ---------- الشعارات + شارة المستخدم ---------- */
-  var LOGO_UNI = 'img/logo-zu.png', LOGO_COL = 'img/logo-col.jpeg';
+  var LOGO_UNI = 'img/logo-zu.png', LOGO_COL = 'img/logo-dept.png';
   function injectChrome() {
     var css = document.createElement('style');
     css.textContent =
@@ -529,7 +529,7 @@
       var base = (SITE === 'main') ? '' : url('main', '');
       var box = document.createElement('div');
       box.className = 'brand-logos env-logos';
-      box.innerHTML = '<img src="' + base + LOGO_UNI + '" alt="شعار جامعة الزقازيق"><img src="' + base + LOGO_COL + '" alt="شعار كلية التربية النوعية">';
+      box.innerHTML = '<img src="' + base + LOGO_UNI + '" alt="شعار جامعة الزقازيق"><img src="' + base + LOGO_COL + '" alt="شعار قسم تكنولوجيا التعليم والحاسب الآلي">';
       header.insertBefore(box, header.firstChild);
       header.classList.add('env-has-logos');
     }
